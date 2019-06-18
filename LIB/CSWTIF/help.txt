@@ -1,0 +1,40 @@
+＜クラス名およびバージョン＞
+CSWTIF
+ver 0.1
+
+＜ファイル名＞
+CSWTIF.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+TIFF画像表示クラス。TIFF画像は、256色もしくは16色のものに対応。16色TIFF画像は、
+最大で16枚まで表示可能。Type Mに対応。
+
+＜コンストラクター＞
+第１引数
+	TIFF画像ファイル名。
+
+＜パブリックフィールド＞
+なし
+
+＜パブリックメソッド＞
+SHOW()
+	グラフィックの現在の表示位置に、指定されたTIFF画像を表示する。
+
+＜使用例＞
+16色TIFF画像を3枚表示する例。144x108で16色のTIFF画像ファイルを、"T16H1.TIF",
+"T16H2.TIF","T16H3.TIF"というファイル名で3つ用意すること。
+
+USECLASS CSWTIF
+USEGRAPHIC 5
+P=NEW(CSWTIF,"T16H1.TIF")
+Q=NEW(CSWTIF,"T16H2.TIF")
+R=NEW(CSWTIF,"T16H3.TIF")
+POINT 0,108
+P.SHOW()
+POINT 144,0
+Q.SHOW()
+POINT 144,108
+R.SHOW()

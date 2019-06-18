@@ -1,0 +1,76 @@
+＜クラス名およびバージョン＞
+P32REG
+ver 0.3
+
+＜ファイル名＞
+P32REG.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+PIC32MXのレジスターアドレスを解決するためのクラス。Type Mで使用する場合は、
+p32mx370f512h.Sファイルのコピーを、Type Zで使用する場合はp32mx170f256b.Sファイル
+のコピーを、Microchip社のXC32配布ファイルから探し、P32REG.BASと同じフォルダーに
+コピーし、ファイル名をP32MX.Sとしておく。
+
+＜コンストラクター＞
+複数の引数を指定可
+	解決したいレジスター名を、文字列で指定する。
+
+＜パブリックフィールド＞
+無し。
+
+＜パブリックメソッド＞
+REGADR(x$)
+	文字列x$で示されるレジスターのアドレスを返す。
+
+REGADR(x)
+	整数値xで示される順番で登録されたレジスターのアドレスを返す。
+
+RDREG(x$)
+	文字列x$で示されるレジスターから１ワード(32 bits)読み込み、返す。
+
+RDREG(x)
+	整数値xで示される順番で登録されたレジスターから１ワード(32 bits)読み込み、
+	返す。
+
+WRREG(x$,y)
+	文字列x$で示されるレジスターに、整数値yを書き込む。
+
+WRREG(x,y)
+	整数値xで示される順番で登録されたレジスターに、整数値yを書き込む。
+
+＜使用例＞
+
+LATA、LATB、PORTBの３つのレジスターの値を取り出し、表示する。
+
+USECLASS P32REG
+R=NEW(P32REG,"LATA","LATB","PORTB")
+print HEX$(R.REGADR("LATA")),
+print HEX$(R.REGADR("LATB")),
+print HEX$(R.REGADR("PORTB")),
+
+＜ヒント＞
+
+メソッドの第一引数に文字列を利用すると、コードは分かりやすいですが、反面、実
+行速度は落ちます。また、RDREG/WRREGを利用する場合も、コードは分かりやすいです
+が、実行速度は落ちます。
+
+分かりやすいコードの例
+
+USECLASS P32REG
+R=NEW(P32REG,"PORTD")
+WHILE 1
+  PRINT R.RDREG("PORTD"),
+WEND
+
+実行速度を重視したコードの例
+
+USEVAR PORTD
+USECLASS P32REG
+R=NEW(P32REG,"PORTD")
+PORTD=R.REGADR("PORTD")
+WHILE 1
+  PRINT PORTD(0),
+WEND

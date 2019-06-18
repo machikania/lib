@@ -1,0 +1,56 @@
+＜クラス名およびバージョン＞
+WS2812
+ver 1.0
+
+＜ファイル名＞
+WS2812.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+シリアル接続LED WS2812Bを使用するためのクラス。
+ポートD10（PWM1）を先頭LEDのDINに接続。
+また、マイコンとLEDのGNDを接続。
+
+WS2812Bの電源（+5V）は十分余裕のあるものを用意する。
+
+
+＜コンストラクター＞
+NEW(WS2812,N)
+　N：シリアル接続されたLEDの数
+
+＜パブリックフィールド＞
+なし
+
+＜パブリックメソッド＞
+SETLED(Position,R,G,B)
+	先頭からPosition番目のLEDのカラーを設定
+	R、G、Bは0～255で指定
+
+_STOP()
+	DMAおよび割り込みを停止
+	プログラム終了時には必ず呼ぶ必要がある
+
+_START()
+	_STOP()メソッド実行後、再開する時に呼ぶ
+
+CPYLED(Position1,Position2)
+	先頭からPosition1番目のLEDのカラーをPosition2番目のLEDにコピー
+
+＜使用例＞
+USECLASS WS2812
+L=NEW(WS2812,10)
+FOR I=0 TO 9
+ CALL SETLED(I,200,100,50)
+NEXT
+DO:IDLE:LOOP UNTIL INKEY()
+CALL _STOP()
+END
+
+
+＜注意＞
+本クラスでは、DMA0、CORETIMER割り込み、Timer3、OC3を使用するため、
+ユーザプログラムでは以下の機能は使用できない。
+
+　SOUND、MUSIC、PLAYWAVE、PWM、CORETIMER割り込み
