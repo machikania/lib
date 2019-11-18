@@ -1,4 +1,4 @@
-REM CKNJ12.BAS ver 0.3
+REM CKNJ12.BAS ver 0.3.1
 REM Class CKNJ12 for MachiKania Type Z/M
 REM using Shinonome 12x12 font
 
@@ -212,7 +212,7 @@ LABEL EUCSTR
       i=i+2
       REM GPrint character
       gosub GPRTCH,j
-    elseif 0x20<b and b<0x80 then
+    elseif 0x20<=b and b<0x80 then
       REM 7 bit character
       gosub GPRTCH,b
       i=i+1
@@ -237,7 +237,7 @@ LABEL UTFSTR
       i=i+3
       REM GPrint character
       gosub GPRTCH,j
-    elseif 0x20<b and b<0x80 then
+    elseif 0x20<=b and b<0x80 then
       REM 7 bit character
       gosub GPRTCH,b
       i=i+1
