@@ -1,106 +1,117 @@
-rem STRDIM class ver 0.2
+rem STRD2 class ver 0.1
 
-useclass ma16, ma64, ma256
 field private strdat,nump
 static private d1,d2,d3,d4,d5
+
+rem The "numd" is required word (32 bit) number minus 4
+static private numd
+
+rem Set maximum length
+method MAXLEN
+  if 0=args(0) OR args(1)<0 OR 65535<args(1) then
+    print "Incorrect length of string"
+    end
+  endif
+  numd=(args(1)+1)/4-4
+return
 
 rem Constructor
 method INIT
   nump=args(0)
   if 0=nump then
-    print "Argument(s) required for cleating STRARRAY object"
+    print "Argument(s) required for cleating STRD2 object"
     end
   elseif 1=nump then
     if 0=d1 then
-	    dim d1(args(1))
+	    dim d1(args(1),numd+3)
 	    strdat=d1
 	elseif 0=d2 then
-	    dim d2(args(1))
+	    dim d2(args(1),numd+3)
 	    strdat=d2
 	elseif 0=d3 then
-	    dim d3(args(1))
+	    dim d3(args(1),numd+3)
 	    strdat=d3
 	elseif 0=d4 then
-	    dim d4(args(1))
+	    dim d4(args(1),numd+3)
 	    strdat=d4
 	elseif 0=d5 then
-	    dim d5(args(1))
+	    dim d5(args(1),numd+3)
 	    strdat=d5
 	else
 	  goto e1
 	endif
   elseif 2=nump then
     if 0=d1 then
-      dim d1(args(1),args(2))
+      dim d1(args(1),args(2),numd+3)
       strdat=d1
 	elseif 0=d2 then
-      dim d2(args(1),args(2))
+      dim d2(args(1),args(2),numd+3)
       strdat=d2
 	elseif 0=d3 then
-      dim d3(args(1),args(2))
+      dim d3(args(1),args(2),numd+3)
       strdat=d3
 	elseif 0=d4 then
-      dim d4(args(1),args(2))
+      dim d4(args(1),args(2),numd+3)
       strdat=d4
 	elseif 0=d5 then
-      dim d5(args(1),args(2))
+      dim d5(args(1),args(2),numd+3)
       strdat=d5
 	else
 	  goto e1
 	endif
   elseif 3=nump then
     if 0=d1 then
-      dim d1(args(1),args(2),args(3))
+      dim d1(args(1),args(2),args(3),numd+3)
       strdat=d1
 	elseif 0=d2 then
-      dim d2(args(1),args(2),args(3))
+      dim d2(args(1),args(2),args(3),numd+3)
       strdat=d2
 	elseif 0=d3 then
-      dim d3(args(1),args(2),args(3))
+      dim d3(args(1),args(2),args(3),numd+3)
       strdat=d3
 	elseif 0=d4 then
-      dim d4(args(1),args(2),args(3))
+      dim d4(args(1),args(2),args(3),numd+3)
       strdat=d4
 	elseif 0=d5 then
-      dim d5(args(1),args(2),args(3))
+      dim d5(args(1),args(2),args(3),numd+3)
       strdat=d5
 	else
 	  goto e1
 	endif
   elseif 4=nump then
     if 0=d1 then
-      dim d1(args(1),args(2),args(3),args(4))
+      dim d1(args(1),args(2),args(3),args(4),numd+3)
       strdat=d1
 	elseif 0=d2 then
-      dim d2(args(1),args(2),args(3),args(4))
+      dim d2(args(1),args(2),args(3),args(4),numd+3)
       strdat=d2
 	elseif 0=d3 then
-      dim d3(args(1),args(2),args(3),args(4))
+      dim d3(args(1),args(2),args(3),args(4),numd+3)
       strdat=d3
 	elseif 0=d4 then
-      dim d4(args(1),args(2),args(3),args(4))
+      dim d4(args(1),args(2),args(3),args(4),numd+3)
       strdat=d4
 	elseif 0=d5 then
-      dim d5(args(1),args(2),args(3),args(4))
+      dim d5(args(1),args(2),args(3),args(4),numd+3)
       strdat=d5
 	else
 	  goto e1
 	endif
   elseif 5=nump then
     if 0=d1 then
-      dim d1(args(1),args(2),args(3),args(4),args(5))
+      dim d1(args(1),args(2),args(3),args(4),args(5),numd+3)
       strdat=d1
 	elseif 0=d2 then
-      dim d2(args(1),args(2),args(3),args(4),args(5))
+      dim d2(args(1),args(2),args(3),args(4),args(5),numd+3)
       strdat=d2
 	elseif 0=d3 then
-      dim d3(args(1),args(2),args(3),args(4),args(5))
+      dim d3(args(1),args(2),args(3),args(4),args(5),numd+3)
       strdat=d3
 	elseif 0=d4 then
-      dim d4(args(1),args(2),args(3),args(4),args(5))
+      dim d4(args(1),args(2),args(3),args(4),args(5),numd+3)
       strdat=d4
 	elseif 0=d5 then
-      dim d5(args(1),args(2),args(3),args(4),args(5))
+      dim d5(args(1),args(2),args(3),args(4),args(5),numd+3)
       strdat=d5
 	else
 	  goto e1
@@ -139,19 +150,24 @@ label SSTR
   endif
   rem Determine length
   t=args(1)
-  for n=0 to 256
+  for n=0 to 65535
     if 0=peek(t+n) then break
   next
-  rem Create string object
-  if n<16 then
-    t=new(ma16)
-  elseif n<64 then
-    t=new(ma64)
-  elseif n<256 then
-    t=new(ma256)
-  else
+  if numd*4+16<=n then
     print "String too long"
     end
+  endif
+  rem Get pointer to store string
+  if 1=nump then
+    t=strdat(args(2))
+  elseif 2=nump then
+    t=strdat(args(2),args(3))
+  elseif 3=nump then
+    t=strdat(args(2),args(3),args(4))
+  elseif 4=nump then
+    t=strdat(args(2),args(3),args(4),args(5))
+  else
+    t=strdat(args(2),args(3),args(4),args(5),args(6))
   endif
   rem Copy string
   n=0
@@ -160,23 +176,6 @@ label SSTR
     poke t+n,c
     n=n+1
   loop while c
-  rem Register string object to array
-  if 1=nump then
-    delete strdat(args(2))
-    strdat(args(2))=t
-  elseif 2=nump then
-    delete strdat(args(2),args(3))
-    strdat(args(2),args(3))=t
-  elseif 3=nump then
-    delete strdat(args(2),args(3),args(4))
-    strdat(args(2),args(3),args(4))=t
-  elseif 4=nump then
-    delete strdat(args(2),args(3),args(4),args(5))
-    strdat(args(2),args(3),args(4),args(5))=t
-  else
-    delete strdat(args(2),args(3),args(4),args(5),args(6))
-    strdat(args(2),args(3),args(4),args(5),args(6))=t
-  endif
 return
 
 rem Let string be
