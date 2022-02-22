@@ -27,8 +27,7 @@ method INIT
 	    dim d5(args(1))
 	    strdat=d5
 	else
-	  print "Too many arrays"
-	  end
+	  goto e1
 	endif
   elseif 2=nump then
     if 0=d1 then
@@ -47,8 +46,7 @@ method INIT
       dim d5(args(1),args(2))
       strdat=d5
 	else
-	  print "Too many arrays"
-	  end
+	  goto e1
 	endif
   elseif 3=nump then
     if 0=d1 then
@@ -67,8 +65,7 @@ method INIT
       dim d5(args(1),args(2),args(3))
       strdat=d5
 	else
-	  print "Too many arrays"
-	  end
+	  goto e1
 	endif
   elseif 4=nump then
     if 0=d1 then
@@ -87,8 +84,7 @@ method INIT
       dim d5(args(1),args(2),args(3),args(4))
       strdat=d5
 	else
-	  print "Too many arrays"
-	  end
+	  goto e1
 	endif
   elseif 5=nump then
     if 0=d1 then
@@ -107,8 +103,7 @@ method INIT
       dim d5(args(1),args(2),args(3),args(4),args(5))
       strdat=d5
 	else
-	  print "Too many arrays"
-	  end
+	  goto e1
 	endif
   else
     print "Too many arguments"
@@ -120,8 +115,7 @@ rem Get the string
 method GETSTR
   var t
   if nump!=args(0) then
-    print "Wrong argument number"
-    end
+    goto e2
   elseif 1=nump then
     t=strdat(args(1))
   elseif 2=nump then
@@ -138,10 +132,10 @@ return ""
 
 rem Set the string
 method SETSTR
+label SSTR
   var t,n,c
   if nump+1!=args(0) then
-    print "Wrong argument number"
-    end
+    goto e2
   endif
   rem Determine length
   t=args(1)
@@ -184,3 +178,28 @@ method SETSTR
     strdat(args(2),args(3),args(4),args(5),args(6))=t
   endif
 return
+
+rem Let string be
+METHOD LETSTR
+  if nump+1!=args(0) then
+    goto e2
+  endif
+  if 1=nump then
+    return gosub(SSTR,args(2),args(1))
+  elseif 2=nump then
+    return gosub(SSTR,args(3),args(1),args(2))
+  elseif 3=nump then
+    return gosub(SSTR,args(4),args(1),args(2),args(3))
+  elseif 4=nump then
+    return gosub(SSTR,args(5),args(1),args(2),args(3),args(4))
+  else
+    return gosub(SSTR,args(6),args(1),args(3),args(3),args(4),args(5))
+  endif
+
+rem Error handling
+label e1
+  print "Too many arrays"
+  end
+label e2
+  print "Wrong argument number"
+  end

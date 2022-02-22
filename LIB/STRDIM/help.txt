@@ -1,6 +1,6 @@
 ＜クラス名およびバージョン＞
 STRDIM
-ver 0.1
+ver 0.2
 
 ＜ファイル名＞
 STRDIM.BAS
@@ -9,7 +9,7 @@ STRDIM.BAS
 BASファイルは、パブリックドメイン。
 
 ＜概要＞
-文字列を含む配列を使用するためのクラス。
+文字列を含む配列を使用するためのクラス。使用にあたっては、MA16, MA64, MA256の3つのクラスが必要。
 
 ＜コンストラクター＞
 第１引数から第５引数
@@ -21,12 +21,12 @@ BASファイルは、パブリックドメイン。
 ＜パブリックメソッド＞
 SETSTR(t$,x[,y[,z[,v[,w]]]])
 	文字列を配列に代入する。t$は代入する文字列。x-wは、配列中の位置を指定。
+LETSTR(x[,y[,z[,v[,w]]]],t$)
+	SETSTRと同じだが、引数の順が異なる。代入する文字列を、最後の引数に指定する。
 GETSTR$(x[,y[,z[,v[,w]]]])
 	文字列を配列から取り出す。x-wは、配列中の位置を指定。
 
 ＜使用例＞
-テキストモードでの日本語表示例。この場合は、BASファイルをUTF-8(BOMなし)で保存す
-る事。
 
 useclass STRDIM
 
@@ -38,7 +38,10 @@ a.setstr("abc",1)
 a.setstr("DEF",2)
 b.setstr("ghi",1,2)
 
+b.letstr(2,3,"jkl")
+
 print a.getstr$(0)
 print a.getstr$(1)
 print a.getstr$(2)
 print b.getstr$(1,2)
+print b.getstr$(2,3)
