@@ -1,4 +1,4 @@
-REM CSWTIF.BAS ver 0.1
+REM CSWTIF.BAS ver 0.2
 REM Class CSWTIF for MachiKania Type M
 REM for showing TIFF picture file
 
@@ -17,10 +17,12 @@ REM FPNT   : file reading point in buffer
 REM FDSIZE : valid bytes in buffer
 REM SNUM   : number of strips
 REM NEXTP16: Next 16 color palette
-REM Txxxx : Tag information
+REM Txxxx  : Tag information
+REM PHYLLO : If system is Phyllosoma
 STATIC PRIVATE FBUFF,FPNT,FDSIZE
 STATIC PRIVATE SNUM,NXTP16
 STATIC PRIVATE TTAG,TTYPE,TNUM,TADDR,TVAL
+STATIC PRIVATE PHYLLO
 
 REM Constructor
 METHOD INIT
@@ -51,6 +53,9 @@ METHOD INIT
     FDSIZE=fget(FBUFF,512)
     FPNT=0
   endif
+  REM Check if the system is Phyllosoma
+  i=SYSTEM(0)
+  PHYLLO=NOT(STRNCMP(i$,"Phyllosoma",10))
   REM Continue to "read tags" routine
 
 REM Read tags
@@ -167,54 +172,84 @@ METHOD SHOW
   fseek SADDR
   if 8=PD then
     REM 8 bit palette
-    if PX=SYSTEM(22) then
+    if PX=SYSTEM(22) and not(PHYLLO) then
       REM Image width is the same as graphic width
       fget SYSTEM(105)+SYSTEM(29)*PX,PX*PY
     else
       REM Image width is shorter than graphic width
-      z=SYSTEM(22) :REM width of display
-      p=SYSTEM(105)+z*SYSTEM(29)+SYSTEM(28) :REM Pointer to write
+      if PHYLLO then
+        z=SYSTEM(28): REM x pos
+        p=SYSTEM(29): REM y pos
+      else
+        z=SYSTEM(22) :REM width of display
+        p=SYSTEM(105)+z*SYSTEM(29)+SYSTEM(28) :REM Pointer to write
+      endif
       FDSIZE=fget(FBUFF,512):FPNT=0
       if 256<x then
         for y=0 to PY-1
           if 256<=FPNT then gosub RFSHF
           for x=0 to 191
-            poke p+x,peek(FBUFF+FPNT+x)
+            if PHYLLO then
+              pset x+z,y+p,peek(FBUFF+FPNT+x)
+            else
+              poke p+x,peek(FBUFF+FPNT+x)
+            endif
           next
           FPNT=FPNT+x
           if 256<=FPNT then gosub RFSHF
           for x=192 to PX-1
-            poke p+x,peek(FBUFF+FPNT+x)
+            if PHYLLO then
+              pset x+z,y+p,peek(FBUFF+FPNT+x)
+            else
+              poke p+x,peek(FBUFF+FPNT+x)
+            endif
           next
           FPNT=FPNT+x
-          p=p+z
+          IF not(PHYLLO) THEN p=p+z
         next
       else
         for y=0 to PY-1
           if 256<=FPNT then gosub RFSHF
           for x=0 to PX-1
-            poke p+x,peek(FBUFF+FPNT+x)
+            if PHYLLO then
+              pset x+z,y+p,peek(FBUFF+FPNT+x)
+            else
+              poke p+x,peek(FBUFF+FPNT+x)
+            endif
           next
           FPNT=FPNT+x
-          p=p+z
+          IF not(PHYLLO) THEN p=p+z
         next
       endif
     endif
   else
     REM 4 bit palette
-    z=SYSTEM(22) :REM width of display
-    p=SYSTEM(105)+z*SYSTEM(29)+SYSTEM(28) :REM Pointer to write
+    if PHYLLO then
+      z=SYSTEM(28): REM x pos
+      p=SYSTEM(29): REM y pos
+    else
+      z=SYSTEM(22) :REM width of display
+      p=SYSTEM(105)+z*SYSTEM(29)+SYSTEM(28) :REM Pointer to write
+    endif
     FDSIZE=fget(FBUFF,512):FPNT=0
     for y=0 to PY-1
       if 256<=FPNT then gosub RFSHF
       for x=0 to PX-1
         if x and 1 then
-          poke p+x,(peek(FBUFF+FPNT+(x>>1)) and 0x0f)+P16
+          if PHYLLO then
+            pset x+z,y+p,(peek(FBUFF+FPNT+(x>>1)) and 0x0f)+P16
+          else
+            poke p+x,(peek(FBUFF+FPNT+(x>>1)) and 0x0f)+P16
+          endif
         else
-          poke p+x,(peek(FBUFF+FPNT+(x>>1)) >> 4)+P16
+          if PHYLLO then
+            pset x+z,y+p,(peek(FBUFF+FPNT+(x>>1)) >> 4)+P16
+          else
+            poke p+x,(peek(FBUFF+FPNT+(x>>1)) >> 4)+P16
+          endif
         endif
       next
-      p=p+z
+      IF not(PHYLLO) THEN p=p+z
       FPNT=FPNT+((PX+1)>>1)
     next
   endif
