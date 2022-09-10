@@ -1,4 +1,4 @@
-REM CSWTIF.BAS ver 0.2
+REM CSWTIF.BAS ver 0.3
 REM Class CSWTIF for MachiKania Type M
 REM for showing TIFF picture file
 
@@ -27,7 +27,7 @@ STATIC PRIVATE PHYLLO
 REM Constructor
 METHOD INIT
   var i,n
-  FNAME$=args$(1)
+  FNAME=args(1)
   REM Buffer size: 512 bytes
   if not(FBUFF) then dim FBUFF(127)
   fclose
