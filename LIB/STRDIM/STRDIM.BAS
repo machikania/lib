@@ -67,8 +67,9 @@ label SSTR
     n=n+1
   loop
   rem Create string object
-  t=new(MA,n+1)
-  t=t.memadr
+  c=new(MA,n+1)
+  t=c.memadr
+  delete c
   rem Copy string
   n=0
   do
