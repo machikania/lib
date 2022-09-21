@@ -1,110 +1,33 @@
-rem STRDIM class ver 0.2
+rem STRDIM class ver 0.3
+rem Minimum version of KM-BASIC: KM-1501/KM-1303/KM-1208
 
-useclass ma16, ma64, ma256
+useclass MA
+
 field private strdat,nump
-static private d1,d2,d3,d4,d5
 
 rem Constructor
 method INIT
+  var v
+  v=system(2)
+  v=val(v$(3))
+  if 1200<=v AND v<1208 or 1300<=v AND v<1303 or 1500<=v AND v<1501 then
+    print "Latest version of KM-BASIC is required"
+    end
+  endif
   nump=args(0)
   if 0=nump then
     print "Argument(s) required for cleating STRARRAY object"
     end
   elseif 1=nump then
-    if 0=d1 then
-	    dim d1(args(1))
-	    strdat=d1
-	elseif 0=d2 then
-	    dim d2(args(1))
-	    strdat=d2
-	elseif 0=d3 then
-	    dim d3(args(1))
-	    strdat=d3
-	elseif 0=d4 then
-	    dim d4(args(1))
-	    strdat=d4
-	elseif 0=d5 then
-	    dim d5(args(1))
-	    strdat=d5
-	else
-	  goto e1
-	endif
+    dim strdat(args(1))
   elseif 2=nump then
-    if 0=d1 then
-      dim d1(args(1),args(2))
-      strdat=d1
-	elseif 0=d2 then
-      dim d2(args(1),args(2))
-      strdat=d2
-	elseif 0=d3 then
-      dim d3(args(1),args(2))
-      strdat=d3
-	elseif 0=d4 then
-      dim d4(args(1),args(2))
-      strdat=d4
-	elseif 0=d5 then
-      dim d5(args(1),args(2))
-      strdat=d5
-	else
-	  goto e1
-	endif
+    dim strdat(args(1),args(2))
   elseif 3=nump then
-    if 0=d1 then
-      dim d1(args(1),args(2),args(3))
-      strdat=d1
-	elseif 0=d2 then
-      dim d2(args(1),args(2),args(3))
-      strdat=d2
-	elseif 0=d3 then
-      dim d3(args(1),args(2),args(3))
-      strdat=d3
-	elseif 0=d4 then
-      dim d4(args(1),args(2),args(3))
-      strdat=d4
-	elseif 0=d5 then
-      dim d5(args(1),args(2),args(3))
-      strdat=d5
-	else
-	  goto e1
-	endif
+    dim strdat(args(1),args(2),args(3))
   elseif 4=nump then
-    if 0=d1 then
-      dim d1(args(1),args(2),args(3),args(4))
-      strdat=d1
-	elseif 0=d2 then
-      dim d2(args(1),args(2),args(3),args(4))
-      strdat=d2
-	elseif 0=d3 then
-      dim d3(args(1),args(2),args(3),args(4))
-      strdat=d3
-	elseif 0=d4 then
-      dim d4(args(1),args(2),args(3),args(4))
-      strdat=d4
-	elseif 0=d5 then
-      dim d5(args(1),args(2),args(3),args(4))
-      strdat=d5
-	else
-	  goto e1
-	endif
+    dim strdat(args(1),args(2),args(3),args(4))
   elseif 5=nump then
-    if 0=d1 then
-      dim d1(args(1),args(2),args(3),args(4),args(5))
-      strdat=d1
-	elseif 0=d2 then
-      dim d2(args(1),args(2),args(3),args(4),args(5))
-      strdat=d2
-	elseif 0=d3 then
-      dim d3(args(1),args(2),args(3),args(4),args(5))
-      strdat=d3
-	elseif 0=d4 then
-      dim d4(args(1),args(2),args(3),args(4),args(5))
-      strdat=d4
-	elseif 0=d5 then
-      dim d5(args(1),args(2),args(3),args(4),args(5))
-      strdat=d5
-	else
-	  goto e1
-	endif
+    dim strdat(args(1),args(2),args(3),args(4),args(5))
   else
     print "Too many arguments"
     end
@@ -139,20 +62,13 @@ label SSTR
   endif
   rem Determine length
   t=args(1)
-  for n=0 to 256
-    if 0=peek(t+n) then break
-  next
+  n=0
+  do while peek(t+n)
+    n=n+1
+  loop
   rem Create string object
-  if n<16 then
-    t=new(ma16)
-  elseif n<64 then
-    t=new(ma64)
-  elseif n<256 then
-    t=new(ma256)
-  else
-    print "String too long"
-    end
-  endif
+  t=new(MA,n+1)
+  t=t.memadr
   rem Copy string
   n=0
   do
@@ -183,8 +99,7 @@ rem Let string be
 METHOD LETSTR
   if nump+1!=args(0) then
     goto e2
-  endif
-  if 1=nump then
+  elseif 1=nump then
     return gosub(SSTR,args(2),args(1))
   elseif 2=nump then
     return gosub(SSTR,args(3),args(1),args(2))
@@ -197,9 +112,6 @@ METHOD LETSTR
   endif
 
 rem Error handling
-label e1
-  print "Too many arrays"
-  end
 label e2
   print "Wrong argument number"
   end
