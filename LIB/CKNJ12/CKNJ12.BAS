@@ -1,10 +1,24 @@
-REM CKNJ12.BAS ver 0.3.1
-REM Class CKNJ12 for MachiKania Type Z/M
+REM CKNJ12.BAS ver 0.4
+REM Class CKNJ12 for MachiKania Type Z/M/P
 REM using Shinonome 12x12 font
 
+USECLASS MA
+
+REM General data used for gprint mode
 STATIC PRIVATE MODE,FBUFF,FO,PLT,BMPF
 
+REM Data used for object for putbmp
+STATIC PRIVATE BMPF0,BMPF1  
+STATIC PUBLIC DWIDTH
+
 METHOD INIT
+  var v
+  v=system(2)
+  v=val(v$(3))
+  if 1200<=v AND v<1208 or 1300<=v AND v<1303 or 1500<=v AND v<1501 then
+    print "Latest version of KM-BASIC is required"
+    end
+  endif
   REM File buffer size is 18 bytes
   dim FBUFF(4)
   REM 12x12 bytes matrix for PUTBMP
@@ -30,11 +44,32 @@ METHOD GPRT
   var t$,b,i,j
   fclose
   FO=0
+  REM Set gprint mode (mode 0x000)
+  MODE=MODE and 255
   REM Set palette
   PLT=args(2)*256+args(3)
   gosub GPSTR,args$(1)
   fclose
   return
+
+METHOD GETBMP
+  var t,b,i,j
+  fclose
+  FO=0
+  REM Set getbmp mode (mode 0x100)
+  MODE=MODE or 0x100
+  REM Set palette
+  PLT=args(2)*256+args(3)
+  REM Initialize data for putbmp
+  DWIDTH=0
+  BMPF0=0
+  BMPF1=0
+  gosub GPSTR,args$(1)
+  fclose
+  return BMPF0
+
+METHOD GETDW
+  return DWIDTH
 
 REM Private method GPRTCH
 REM 1st param: JIS code #
@@ -79,16 +114,37 @@ LABEL GPRTCH
       endif
     next
   next
-  REM Draw in graphic
-  x=SYSTEM(28)
-  y=SYSTEM(29)
-  if SYSTEM(22)<x+12 then
-    x=0
-    y=y+12
-    point x,y
+  if MODE and 0x100 then
+    REM Create new data for putbmp
+    i=NEW(MA,(DWIDTH+12)*12)
+    delete BMPF1
+    BMPF1=i.memadr
+    delete i
+    REM Copy to new data from old data
+    for y=0 to 11
+      for x=0 to DWIDTH-1
+        poke BMPF1+y*(DWIDTH+12)+x,peek(BMPF0+y*DWIDTH+x)
+      next
+      for x=0 to 11
+        poke BMPF1+y*(DWIDTH+12)+x+DWIDTH,peek(BMPF+y*12+x)
+      next
+    next
+    DWIDTH=DWIDTH+12
+    REM Copy from BMPF1 to BMPF0
+    delete BMPF0
+    BMPF0=BMPF1
+  else
+    REM Draw in graphic
+    x=SYSTEM(28)
+    y=SYSTEM(29)
+    if SYSTEM(22)<x+12 then
+      x=0
+      y=y+12
+      point x,y
+    endif
+    putbmp x,y,12,12,BMPF
+    point x+12,y
   endif
-  putbmp x,y,12,12,BMPF
-  point x+12,y
   return
 
 LABEL GPRTHS
@@ -102,16 +158,37 @@ LABEL GPRTHS
       endif
     next
   next
-  REM Draw in graphic
-  x=SYSTEM(28)
-  y=SYSTEM(29)
-  if SYSTEM(22)<x+6 then
-    x=0
-    y=y+12
-    point x,y
+  if MODE and 0x100 then
+    REM Create new data for putbmp
+    i=NEW(MA,(DWIDTH+6)*12)
+    delete BMPF1
+    BMPF1=i.memadr
+    delete i
+    REM Copy to new data from old data
+    for y=0 to 11
+      for x=0 to DWIDTH-1
+        poke BMPF1+y*(DWIDTH+6)+x,peek(BMPF0+y*DWIDTH+x)
+      next
+      for x=0 to 5
+        poke BMPF1+y*(DWIDTH+6)+x+DWIDTH,peek(BMPF+y*6+x)
+      next
+    next
+    DWIDTH=DWIDTH+6
+    REM Copy from BMPF1 to BMPF0
+    delete BMPF0
+    BMPF0=BMPF1
+  else
+    REM Draw in graphic
+    x=SYSTEM(28)
+    y=SYSTEM(29)
+    if SYSTEM(22)<x+6 then
+      x=0
+      y=y+12
+      point x,y
+    endif
+    putbmp x,y,6,12,BMPF
+    point x+6,y
   endif
-  putbmp x,y,6,12,BMPF
-  point x+6,y
   return
 
 REM Private method FOP
@@ -136,7 +213,7 @@ LABEL FGETCH
     REM File isn't yet open
     REM open it 
     FO=1
-    if 2=MODE then
+    if 2=(MODE and 255) then
       gosub FOP,"SHNMK12.UNI"
     else
       gosub FOP,"SHNMK12.JIS"
@@ -149,7 +226,7 @@ LABEL FGETCH
     fget FBUFF,12
     return
   endif
-  if 2=MODE then
+  if 2=(MODE and 255) then
     REM UTF-8
     if p<0x0500 then
       p=p-0x500
@@ -192,9 +269,9 @@ REM return: string with PCG set
 LABEL GPSTR
   t$=""
   i=0
-  if 1=MODE then
+  if 1=(MODE and 255) then
   	goto EUCSTR
-  elseif 2=MODE then
+  elseif 2=(MODE and 255) then
   	goto UTFSTR
   else
   	goto EUCSTR
