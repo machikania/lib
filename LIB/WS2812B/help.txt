@@ -1,0 +1,45 @@
+＜クラス名およびバージョン＞
+WS2812B
+ver 1.0
+
+＜ファイル名＞
+WS2812B.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+MachiKania type Pでシリアル接続LED WS2812Bを使用するためのクラス。
+指定のポートを先頭LEDのDINに接続。
+また、マイコンとLEDのGNDを接続。
+
+WS2812Bの電源（+5V）は十分余裕のあるものを用意する。
+
+
+＜コンストラクター＞
+NEW(WS2812B,N,P)
+　N：シリアル接続されたLEDの数
+　P：IO bit番号（0-7）
+
+＜パブリックフィールド＞
+なし
+
+＜パブリックメソッド＞
+SETLED(Position,R,G,B)
+	先頭からPosition番目のLEDのカラーを設定
+	R、G、Bは0～255で指定
+
+CPYLED(Position1,Position2)
+	先頭からPosition1番目のLEDのカラーをPosition2番目のLEDにコピー
+
+PUTLED()
+	バッファの内容をWS2812B列に出力
+
+＜使用例＞
+USECLASS WS2812B
+L=NEW(WS2812B,10,0)
+FOR I=0 TO 9
+ L.SETLED(I,200,100,50)
+NEXT
+L.PUTLED()
+END

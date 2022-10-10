@@ -1,0 +1,178 @@
+REM BIGNUM CLASS
+REM Enables calculation of 1000 decimal digits
+
+FIELD PUBLIC VALUE
+STATIC TEMP
+
+METHOD INIT
+ REM Create a big number variable
+ REM Argument A means A.000000000
+ DIM VALUE(252)
+ IF TEMP=0 THEN DIM TEMP(502)
+ VAR I
+ VALUE(0)=ARGS(1)
+ FOR I=1 TO 251:VALUE(I)=0:NEXT
+RETURN
+
+METHOD SETVAL
+ REM Set value
+ REM Argument A means A.000000000
+ VAR I
+ VALUE(0)=ARGS(1)
+ FOR I=1 TO 251:VALUE(I)=0:NEXT
+RETURN
+
+METHOD RETVAL
+ REM Return value of array number n
+RETURN VALUE(ARGS(1))
+
+METHOD AS
+ REM Copy big number array
+ VAR I,P
+ P=ARGS(1):P=P.VALUE
+ FOR I=0 TO 251:VALUE(I)=P(I):NEXT
+RETURN
+
+METHOD EQUAL
+ REM Check if values are equal
+ REM Equal:1 Not equal:0
+ VAR I,P
+ P=ARGS(1):P=P.VALUE
+ FOR I=0 TO 251
+  IF VALUE(I)-P(I) THEN RETURN 0
+ NEXT
+RETURN 1
+
+METHOD ADD
+ REM Add big number to big number
+ VAR I,C,P,Q
+ P=ARGS(1):P=P.VALUE:Q=ARGS(2):Q=Q.VALUE:C=0
+ FOR I=251 TO 0 STEP -1
+  VALUE(I)=P(I)+Q(I)+C
+  IF VALUE(I)>=10000 THEN
+   VALUE(I)=VALUE(I)-10000:C=1
+  ELSE
+   C=0
+  ENDIF
+ NEXT
+ GOSUB ROUND
+RETURN
+
+METHOD SUB
+ REM Substruct big number from big number
+ VAR I,C,P
+ P=ARGS(1):P=P.VALUE:Q=ARGS(2):Q=Q.VALUE:C=0
+ FOR I=251 TO 0 STEP -1
+  VALUE(I)=P(I)-Q(I)-C
+  IF VALUE(I)<0 THEN
+   VALUE(I)=VALUE(I)+10000:C=1
+  ELSE
+   C=0
+  ENDIF
+ NEXT
+ GOSUB ROUND
+RETURN
+
+METHOD DIV
+ REM Devide big number by small number
+ VAR I,P,D,Q,R
+ P=ARGS(1):P=P.VALUE:D=ARGS(2)
+ FOR I=0 TO 251:VALUE(I)=P(I):NEXT
+ FOR I=0 TO 251
+  IF VALUE(I) THEN
+   Q=VALUE(I)/D:R=VALUE(I)%D
+   VALUE(I)=Q
+   IF I<251 THEN VALUE(I+1)=VALUE(I+1)+R*10000
+  ENDIF
+ NEXT
+ IF R*10000/D>4999 THEN VALUE(251)=VALUE(251)+1
+ GOSUB ROUND
+RETURN
+
+METHOD MUL
+ REM Mutiply big number by small number
+ VAR I,P,D,C
+ P=ARGS(1):P=P.VALUE:D=ARGS(2):C=0
+ FOR I=251 TO 0 STEP -1
+  VALUE(I)=P(I)*D+C
+  IF VALUE(I)>=10000 THEN
+   C=VALUE(I)/10000
+   VALUE(I)=VALUE(I)%10000
+  ELSE
+   C=0
+  ENDIF
+ NEXT
+ GOSUB ROUND
+RETURN
+
+METHOD MUL2
+ REM Mutiply big number by big number
+ VAR I,J,P,Q,D,C
+ P=ARGS(1):P=P.VALUE:Q=ARGS(2):Q=Q.VALUE
+ FOR I=0 TO 502:TEMP(I)=0:NEXT
+ FOR I=251 TO 0 STEP -1
+  C=0
+  FOR J=251 TO 0 STEP -1
+   D=TEMP(I+J)+P(I)*Q(J)+C
+   IF D>=10000 THEN
+    C=D/10000
+    TEMP(I+J)=D%10000
+   ELSE
+    C=0
+    TEMP(I+J)=D
+   ENDIF
+  NEXT
+  IF I>0 THEN TEMP(I-1)=TEMP(I-1)+C
+ NEXT
+ FOR I=251 TO 0 STEP -1
+  VALUE(I)=TEMP(I)
+ NEXT
+ GOSUB ROUND
+RETURN
+
+LABEL ROUND
+ VAR I
+ I=251
+ IF VALUE(I)<9990 THEN RETURN
+ DO
+  VALUE(I)=0
+  I=I-1
+  VALUE(I)=VALUE(I)+1
+ LOOP UNTIL VALUE(I)<10000
+RETURN
+
+METHOD PRT
+ REM Print value
+ REM PRT(i,j)
+ REM i:Start position after the decimal point
+ REM   of the VALUE array
+ REM     Ex i=1  VALUE(0) "." VALUE(1)
+ REM j:Number of digits after the decimal point
+
+ VAR I,K,S
+ K=ARGS(1)
+ IF K=0 THEN
+  PRINT "0";
+ ELSE
+  I=0
+  WHILE VALUE(I)=0 AND I<K-1:I=I+1:WEND
+  PRINT VALUE(I);:I=I+1
+  DO WHILE I<K
+   S$="000"+DEC$(VALUE(I)):PRINT S$(-4);
+   I=I+1
+  LOOP
+ ENDIF
+ IF K>250 THEN RETURN
+ K=ARGS(2)
+ IF K=0 THEN RETURN
+ PRINT ".";
+ DO WHILE K>=4 AND I<=250
+  S$="000"+DEC$(VALUE(I)):PRINT S$(-4);
+  K=K-4:I=I+1
+ LOOP
+ IF K>0 AND I<=250 THEN
+  S$="000"+DEC$(VALUE(I)):S$=S$(-4)
+  PRINT S$(0,K);
+ ENDIF
+ PRINT
+RETURN
