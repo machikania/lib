@@ -1,6 +1,6 @@
 ƒƒNƒ‰ƒX–¼‚¨‚æ‚Ñƒo[ƒWƒ‡ƒ“„
 CKNJ16
-ver 0.3.1
+ver 0.4
 
 ƒƒtƒ@ƒCƒ‹–¼„
 CKNJ16.BAS
@@ -23,10 +23,23 @@ BASƒtƒ@ƒCƒ‹‚ÍAƒpƒuƒŠƒbƒNƒhƒƒCƒ“BSINONOME.*ƒtƒ@ƒCƒ‹‚É•t‚¢‚Ä‚ÍAfontƒfƒBƒŒƒNƒgƒ
 ƒƒpƒuƒŠƒbƒNƒtƒB[ƒ‹ƒh„
 ‚È‚µ
 
+ƒƒpƒuƒŠƒbƒNƒXƒ^ƒeƒBƒbƒNƒtƒB[ƒ‹ƒh„
+DWIDTH
+	GETBMPƒƒ\ƒbƒh‚Å“¾‚ç‚ê‚½ƒf[ƒ^‚Ì‰¡•‚ðƒhƒbƒg”‚Å•ÛŽ‚·‚éB
+
 ƒƒpƒuƒŠƒbƒNƒƒ\ƒbƒh„
 GPRT(x$,y,z)
 	“ú–{Œê‚ðŠÜ‚Þ•¶Žš—ñx$‚ðAƒOƒ‰ƒtƒBƒbƒNƒfƒBƒXƒvƒŒƒC‚É•\Ž¦‚·‚éBy‚Í•¶ŽšFAz‚Í
 	”wŒiF‚ðŽw’èB
+
+GETBMP(x$,y,z)
+	“ú–{Œê‚ðŠÜ‚Þ•¶Žš—ñx$‚ðAPUTBMPƒXƒe[ƒgƒƒ“ƒg‚Å—p‚¢‚é‚½‚ß‚Ì”z—ñƒf[ƒ^[(ƒIƒu
+	ƒWƒFƒNƒg)‚É•ÏŠ·‚µAƒf[ƒ^[‚Ö‚Ìƒ|ƒCƒ“ƒ^[‚ð•Ô‚·By‚Í•¶ŽšFAz‚Í”wŒiF‚ðŽw’èB
+	ƒf[ƒ^[‚Ì‰¡ƒhƒbƒg”‚ÍACKNJ12::DWIDTH‚à‚µ‚­‚ÍGETDWƒƒ\ƒbƒh‚ÅŽæ“¾‚·‚éŽ–‚ª‚Å
+	‚«‚éB‚È‚¨A–ß‚è’l‚Å“¾‚ç‚ê‚½ƒIƒuƒWƒFƒNƒg‚ÍAŽg—pŒã‚ÍDELETE‚·‚é‚±‚ÆB
+
+GETDW()
+	GETBMPƒƒ\ƒbƒh‚Å“¾‚ç‚ê‚½ƒf[ƒ^‚Ì‰¡•‚ðƒhƒbƒg”‚Å•Ô‚·B
 
 ƒŽg—p—á„
 ƒeƒLƒXƒgƒ‚[ƒh‚Å‚Ì“ú–{Œê•\Ž¦—áB‚±‚Ìê‡‚ÍABASƒtƒ@ƒCƒ‹‚ðUTF-8(BOM‚È‚µ)‚Å•Û‘¶‚·
@@ -46,4 +59,15 @@ USEGRAPHIC
 POINT 50,50
 CKNJ16::INIT("UTF-8")
 CKNJ16::GPRT("–{“ú‚Í°“V‚È‚è",7,0)
+A$=INPUT$()
+
+GETBMPƒƒ\ƒbƒh‚ÍAˆÈ‰º‚Ì—á‚Ì‚æ‚¤‚ÉŽg—p‚·‚éB
+
+USECLASS CKNJ16
+USEGRAPHIC
+POINT 50,50
+K=new(CKNJ16,"UTF-8")
+B=K.GETBMP("–{“ú‚Í°“V‚È‚è",7,0)
+PUTBMP ,CKNJ16::DWIDTH,16,B
+DELETE B
 A$=INPUT$()

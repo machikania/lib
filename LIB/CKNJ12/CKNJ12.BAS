@@ -12,13 +12,6 @@ STATIC PRIVATE BMPF0,BMPF1
 STATIC PUBLIC DWIDTH
 
 METHOD INIT
-  var v
-  v=system(2)
-  v=val(v$(3))
-  if 1200<=v AND v<1208 or 1300<=v AND v<1303 or 1500<=v AND v<1501 then
-    print "Latest version of KM-BASIC is required"
-    end
-  endif
   REM File buffer size is 18 bytes
   dim FBUFF(4)
   REM 12x12 bytes matrix for PUTBMP
