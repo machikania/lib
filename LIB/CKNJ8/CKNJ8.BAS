@@ -1,8 +1,14 @@
-REM CKNJ8.BAS ver 0.3
-REM Class CKNJ8 for MachiKania Type Z/M
+REM CKNJ8.BAS ver 0.4
+REM Class CKNJ8 for MachiKania Type Z/M/P
 REM using Misaki 8x8 font
 
+USECLASS MA
+
+REM General data used for gprint mode
 STATIC PRIVATE CACHE,CNUM,MODE,FBUFF,FO
+
+REM Data used for object for putbmp
+STATIC PUBLIC DWIDTH
 
 METHOD INIT
   REM File buffer size is 8 bytes
@@ -50,6 +56,39 @@ METHOD GPRT
   gprint ,args(2),args(3),t$
   fclose
   return
+
+METHOD GETBMP
+  var t$,b,i,j,x,y,r
+  fclose
+  FO=0
+  t$=gosub$(MKSTR,args$(1))
+  b=len(t$)
+  DWIDTH=b*8
+  REM Create new data object for putbmp as r
+  i=NEW(MA,DWIDTH*8)
+  r=i.memadr
+  delete i
+  for x=0 to b-1
+    REM Get PCG data address in i
+    i=system(104)+peek(t+x)*8
+    for y=0 to 7
+      REM Get PCG low in j
+      j=peek(i+y)
+      REM Create BMP data for PUTBMP
+      if j and 0x80 then poke r+y*DWIDTH+x*8,args(2) else poke r+y*DWIDTH+x*8,args(3)
+      if j and 0x40 then poke r+y*DWIDTH+x*8+1,args(2) else poke r+y*DWIDTH+x*8+1,args(3)
+      if j and 0x20 then poke r+y*DWIDTH+x*8+2,args(2) else poke r+y*DWIDTH+x*8+2,args(3)
+      if j and 0x10 then poke r+y*DWIDTH+x*8+3,args(2) else poke r+y*DWIDTH+x*8+3,args(3)
+      if j and 0x08 then poke r+y*DWIDTH+x*8+4,args(2) else poke r+y*DWIDTH+x*8+4,args(3)
+      if j and 0x04 then poke r+y*DWIDTH+x*8+5,args(2) else poke r+y*DWIDTH+x*8+5,args(3)
+      if j and 0x02 then poke r+y*DWIDTH+x*8+6,args(2) else poke r+y*DWIDTH+x*8+6,args(3)
+      if j and 0x01 then poke r+y*DWIDTH+x*8+7,args(2) else poke r+y*DWIDTH+x*8+7,args(3)
+    next
+  next
+  return r
+
+METHOD GETDW
+  return DWIDTH
 
 REM Private method GETPCG
 REM 1st param: JIS code # starting from 0x2121
