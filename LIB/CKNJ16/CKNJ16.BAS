@@ -101,13 +101,13 @@ LABEL GPRTCH
     REM Copy to new data from old data
     for y=0 to 15
       for x=0 to DWIDTH-1
-        poke BMPF1+y*(DWIDTH+15)+x,peek(BMPF0+y*DWIDTH+x)
+        poke BMPF1+y*(DWIDTH+16)+x,peek(BMPF0+y*DWIDTH+x)
       next
       for x=0 to 15
-        poke BMPF1+y*(DWIDTH+15)+x+DWIDTH,peek(BMPF+y*16+x)
+        poke BMPF1+y*(DWIDTH+16)+x+DWIDTH,peek(BMPF+y*16+x)
       next
     next
-    DWIDTH=DWIDTH+15
+    DWIDTH=DWIDTH+16
     REM Copy from BMPF1 to BMPF0
     delete BMPF0
     BMPF0=BMPF1
