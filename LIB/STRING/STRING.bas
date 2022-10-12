@@ -1,5 +1,5 @@
 REM STRING.BAS ver 0.1
-REM Class STRING for MachiKania Type Z/M
+REM Class STRING for MachiKania Type Z/M/P
 REM for handling string as a class object
 
 REM There must be only one public field
@@ -27,7 +27,7 @@ METHOD EQUALS
 REM Public method INDEX
 METHOD INDEX
   var p
-  if 0<=args(1) then
+  if 0<=args(1) and args(1)<=255 then
     REM args(1) is a character
     for p=0 to len(STR$)-1
       if peek(STR+p)=args(1) then return p
@@ -44,7 +44,7 @@ METHOD INDEX
 REM Public method LINDEX
 METHOD LINDEX
   var p
-  if 0<=args(1) then
+  if 0<=args(1) and args(1)<=255 then
     REM args(1) is a character
     for p=len(STR$)-1 to 0 step -1
       if peek(STR+p)=args(1) then return p
