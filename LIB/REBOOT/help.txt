@@ -1,0 +1,31 @@
+＜クラス名およびバージョン＞
+REBOOT
+ver 0.1
+
+＜ファイル名＞
+REBOOT.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。c_convert.phpは、LGPL。blink.cは、BSD-3-Clause。
+
+＜概要＞
+RAM上に配置されたプログラムを実行するためのクラス。
+
+＜コンストラクター＞
+第１引数
+	プログラム開始アドレス。
+
+＜パブリックフィールド＞
+なし。
+
+＜パブリックメソッド＞
+INIT
+	コンストラクターを参照。
+
+＜使用例＞
+
+0x20010000からのアドレスにHEXファイルのプログラムを読み込み、実行する例。CLDHEXクラスも参照。
+
+useclass CLDHEX,REBOOT
+h=new(CLDHEX,"PACMAN.HEX",0x20010000,65536)
+REBOOT::INIT(h.SLADDR)
