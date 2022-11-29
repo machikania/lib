@@ -1,0 +1,25 @@
+if (TARGET tinyusb_device)
+	add_executable(${ENV_TARGET}
+			hello_usb.c
+			machikania.c
+			regsub.c
+			regexp.c
+			functions.c
+		)
+
+	# Pull in our pico_stdlib which aggregates commonly used features
+	target_link_libraries(${ENV_TARGET} pico_stdlib)
+
+	# enable usb output, disable uart output
+	pico_enable_stdio_usb(${ENV_TARGET} ${ENABLE_USB_UART})
+	pico_enable_stdio_uart(${ENV_TARGET} 0)
+
+	# create map/bin/hex/uf2 file etc.
+	pico_add_extra_outputs(${ENV_TARGET})
+
+	# use user linker script
+	pico_set_linker_script(${ENV_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/lds/${ENV_LINKER_SCRIPT})
+	
+elseif(PICO_ON_DEVICE)
+	message(WARNING "not building hello_usb because TinyUSB submodule is not initialized in the SDK")
+endif()
