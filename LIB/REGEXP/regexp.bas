@@ -1,3 +1,8 @@
+REM ************************
+REM * Class REGEXP ver 0.2 *
+REM *  written by Katsumi  *
+REM ************************
+
 useclass CLDHEX
 static private C_CODE
 field RE,STR
@@ -39,13 +44,15 @@ method MATCH
   return t$(0,RE(10+args(1))-t)
 
 method REPLACE
-  var t,i,r
+  var t,i,r,b
+  dim b(255)
   STR$=args$(1)
   r$=""
   t=STR
   i=gosub(C_REGEXEC,RE,t)
   do while i
-    r$=r$+t$(0,RE(0)-t)+args$(2)
+    gosub(C_REGSUB,RE,args$(2),b)
+    r$=r$+t$(0,RE(0)-t)+b$
     t=RE(10)
     i=gosub(C_REGEXEC,RE,t)
   loop
