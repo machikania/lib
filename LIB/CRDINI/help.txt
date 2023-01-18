@@ -1,0 +1,44 @@
+＜クラス名およびバージョン＞
+CRDINI
+ver 0.1
+
+＜ファイル名＞
+CRDINI.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+MMC/SDカードのルートにある、MachiKaniaの初期設定ファイル（MACHIKAZ.INI, MACHIKAM.INI, MACHIKAP.INI）での設定事項を調査するためのクラス。
+
+＜コンストラクター＞
+引数なし。
+
+＜パブリックフィールド＞
+なし。
+
+＜パブリックメソッド＞
+INIT()
+	初期設定ファイルの情報を、メモリーに読み込む。
+
+ISSET(x$)
+	x$で示された文字列の設定が初期化ファイルにあるかどうかを返す。あれば１、なければ０。
+
+GETVAL$(x$)
+	x$で示された文字列の設定について、初期化ファイルで「=」を用いて指定された内容を返す。指定されていなければ、長さ0の文字列を返す。
+
+＜使用例＞
+
+MachiKania type Pでの例。
+
+useclass CRDINI
+CRDINI::INIT()
+print CRDINI::ISSET("101KEY")
+print CRDINI::ISSET("106KEY")
+print CRDINI::GETVAL$("AUTOEXEC")
+
+実行結果の例：
+
+1
+0
+MACHIKAP.BAS
