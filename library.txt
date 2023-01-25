@@ -28,6 +28,12 @@ CKNJ12
 CKNJ16
 	日本語表示クラス。東雲フォント(16x16)を使用。
 
+CLDHEX
+	HEXファイルの内容をメモリーに取り込むためのクラス。
+
+CRDINI
+	MachiKania INIファイル（MACHIKAP.INI、MACHIKAM.INI等）を調査するためのクラス。
+
 CSWTIF
 	TIFF画像表示クラス。
 
@@ -37,11 +43,26 @@ IL9325
 IL9341
 	液晶コントローラILI9341を搭載したQVGA液晶を利用するためのクラス。
 
+MA
+	メモリーアロケーションのためのクラス。
+
 P32REG
 	PIC32MXのレジスターアドレスを解決するためのクラス。
 
+REBOOT
+	MachiKania type Pをリブートするためのクラス。Cコード読み込み方法を示したサンプル。
+
+REGEXP
+	MachiKania type Pで正規表現を使うためのクラス。
+
+S95461
+	液晶モジュールS95461Cを制御するためのクラス。
+
+SP9341
+	液晶モジュールILI9341を制御するためのクラス。
+
 STRING
-JavaのStringクラス様の、文字列オブジェクトを扱うクラス。
+	JavaのStringクラス様の、文字列オブジェクトを扱うクラス。
 
 WS2812
 	シリアル接続LED WS2812Bを利用するためのクラス。
