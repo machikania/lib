@@ -1,6 +1,6 @@
 REM MachiKania class WGET
 
-static private pdata
+static private pdata,header,ucheader
 
 method FORSTRING
   var t,s,i
@@ -15,6 +15,8 @@ method FORSTRING
     t$=t$+s$
   loop while 0<i
   TCPCLOSE
+  i=gosub(gheader,t$)
+  if i then t$=t$(i)
 return t$
 
 method FORBUFF
@@ -25,6 +27,44 @@ method FORFILE
   rem if gosub(connect,args(2)) then return 0
 return
 
+method GETHEADER
+  if args(0)=0 then return header$
+  var t,i,c
+  REM Add ':' character
+  t$=args$(1)+":"
+  REM To upper cases
+  for i=0 to len(t$)-1
+    c=peek(t+i)
+    if 0x61<=c and c<=0x7a then poke t+i,c-0x20
+  next
+  REM Seek ucheader$ for the name of element
+  for i=0 to len(ucheader$)-1
+    if 2<=i then
+      if peek(ucheader+i-2)!=0x0d then continue
+    endif
+    if 1<=i then
+      if peek(ucheader+i-1)!=0x0a then continue
+    endif
+    REM Reach this line in the beginning of a line. Check the name of element
+    if strncmp(ucheader$(i),t$,len(t$)) then continue
+    REM Found the element in header. Skip blank in the beginning
+    i=i+len(t$)
+    do while peek(header+i)=0x20 OR peek(header+i)=0x09
+      i=i+1
+    loop
+    REM Prepare return string
+    t$=header$(i)
+    for i=0 to len(t$)-1
+      if peek(t+i)!=0x0d then continue
+      poke t+i,0
+      break
+    next
+    REM All done
+    return t$
+  next
+  return ""
+return
+
 label connect
   REM t$: initially, args$(1)
   REM u$: URI
@@ -33,7 +73,10 @@ label connect
   REM s: TLS or not
   REM i: integer for counter
   var t,u,h,p,s,i
+  REM Initializations
   t$=args$(1)
+  header$=""
+  ucheader=0
   REM Check protocol
   if 0=strncmp(t$,"http://",7) then
     s=0
@@ -98,3 +141,23 @@ label connect
     idle
   loop
 return
+
+label gheader
+  if ucheader then return 0
+  var i,c
+  header$=header$+args$(1)
+  for i=0 to len(t$)-5
+    if peek(t+i+0)!=0x0d then continue
+    if peek(t+i+1)!=0x0a then continue
+    if peek(t+i+2)!=0x0d then continue
+    if peek(t+i+3)!=0x0a then continue
+    header$=header$(0,i+4)
+    ucheader$=header$
+    for i=0 to len(ucheader$)-1
+      c=peek(ucheader+i)
+      REM To upper case
+      if 0x61<=c and c<=0x7a then poke ucheader+i,c-0x20
+    next
+    return len(header$)
+  next
+return 0
