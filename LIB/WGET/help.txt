@@ -1,0 +1,60 @@
+＜クラス名およびバージョン＞
+WGET
+ver 0.1
+
+＜ファイル名＞
+WGET.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+Wifi接続時に、クライアントとして指定のURLから情報を取得するためのクラス
+
+＜コンストラクター＞
+なし
+
+＜パブリックフィールド＞
+なし
+
+＜パブリックスタティックメソッド＞
+FORSTRING$(x$[,y$])
+	指定のURLに接続し、ダウンロードしたデーターを文字列として返す。
+	x$に、URLを指定。POSTメソッドを使う場合は、サーバーに送出する文字列をy$に指定。
+
+FORFILE(x$,y$[,z$])
+	指定のURLに接続し、ダウンロードしたデーターをファイルとして保存する。
+	x$に保存するファイル名を、y$にURLを指定する。POSTメソッドを使う場合は、サーバーに送出する文字列をz$に指定。
+	戻り値は、保存したファイルのサイズ（バイト値）。
+
+FORBUFFER(x,y,z1$[,z2$])
+	指定のURLに接続し、ダウンロードしたデーターを指定した配列に保存する。
+	xに配列名を、yに配列の有効バイト数を指定する。
+	z1$に、URLを指定。POSTメソッドを使う場合は、サーバーに送出する文字列をz2$に指定。
+	戻り値は、指定URLから得られたデーターのバイト数。
+	この値がyより大きい場合は、すべてのデーターが配列に保存されていない事に注意。
+
+GETHEADER$([x$])
+	FORxxxメソッドを使用した後に呼び出すと、ヘッダー情報を返す。
+	x$を指定しない場合はヘッダー全体を、x$を指定した場合は、指定した内容のみを返す。
+	例えば、"Content-Length:"の内容を知りたい場合は"content-length"の用に指定する（大文字小文字の区別なし）。
+
+＜使用例＞
+useclass WGET
+print WGET::FORSTRING$("http://abehiroshi.la.coocan.jp/")
+wait 120
+print WGET::GETHEADER$()
+print WGET::GETHEADER$("content-length")
+
+useclass WGET
+print WGET::FORFILE("abe.jpg","http://abehiroshi.la.coocan.jp/abe-top-20190328-2.jpg")
+print WGET::GETHEADER$()
+
+useclass WGET
+dim b(6749): REM 6749=27000/4-1
+i=WGET::FORBUFFER(27000,b,"http://abehiroshi.la.coocan.jp/abe-top-20190328-2.jpg")
+print i
+print WGET::GETHEADER$()
+fopen "abe2.jpg","w"
+fput b,i
+fclose

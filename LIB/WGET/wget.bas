@@ -19,9 +19,57 @@ method FORSTRING
   if i then t$=t$(i)
 return t$
 
-method FORBUFF
-  rem if gosub(connect,args(3)) then return 0
-return
+method FORBUFFER
+  var b,l,t,s,i,j,k
+  if 3<args(0) then pdata$=args$(4)
+  if gosub(connect,args(3)) then return 0
+  b=args(2) :REM Buffer
+  l=args(1) :REM Buffer length
+  REM Get header
+  t$=""
+  dim s(64)
+  do
+    i=TCPRECEIVE(s,256)
+    if 0=i then
+      idle
+      continue
+    endif
+    poke s+i,0
+    k=len(t$)
+    t$=t$+s$
+    j=gosub(gheader,t$)
+    if 0=j then continue
+    REM Copy after header
+    i=i-j+k
+    j=j-k
+    do while 0<i
+      if 0<l then
+        poke b,peek(s+j)
+        b=b+1:l=l-1
+      endif
+      i=i-1:j=j+1
+    loop
+    break
+  loop
+  REM Get remaining data during connection
+  do while TCPSTATUS(0)
+    i=TCPRECEIVE(b,l)
+    if 0=i then
+      idle
+      continue
+    endif
+    b=b+i:l=l-i
+  loop
+  REM Get remaining data after dis-connection
+  do
+    i=TCPRECEIVE(b,l)
+    if 0=i then break
+    b=b+i:l=l-i
+  loop
+  i=TCPSTATUS(1)
+  TCPCLOSE
+  if i then return i+args(1)
+return args(1)-l
 
 method FORFILE
   var t,s,i,j,k
@@ -29,8 +77,8 @@ method FORFILE
   if gosub(connect,args(2)) then return 0
   REM Open a file
   fopen args$(1),"w"
-  t$=""
   REM Get header
+  t$=""
   dim s(64)
   do
     i=TCPRECEIVE(s,256)
