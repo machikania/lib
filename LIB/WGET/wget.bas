@@ -24,11 +24,54 @@ method FORBUFF
 return
 
 method FORFILE
-  rem if gosub(connect,args(2)) then return 0
-return
+  var t,s,i,j,k
+  if 2<args(0) then pdata$=args$(3)
+  if gosub(connect,args(2)) then return 0
+  REM Open a file
+  fopen args$(1),"w"
+  t$=""
+  REM Get header
+  dim s(64)
+  do
+    i=TCPRECEIVE(s,256)
+    if 0=i then
+      idle
+      continue
+    endif
+    poke s+i,0
+    k=len(t$)
+    t$=t$+s$
+    j=gosub(gheader,t$)
+    if 0=j then continue
+    REM Save after header
+    fput s+j-k,i-j+k
+    break
+  loop
+  REM Get and save remaining data during connection
+  do while TCPSTATUS(0)
+    i=TCPRECEIVE(s,256)
+    if 0=i then
+      idle
+      continue
+    endif
+    fput s,i
+  loop
+  REM Get and save remaining data after dis-connection
+  do
+    i=TCPRECEIVE(s,256)
+    if 0=i then break
+    fput s,i
+  loop
+  TCPCLOSE
+  i=flen()
+  fclose
+return i
 
 method GETHEADER
-  if args(0)=0 then return header$
+  if args(0)=0 then
+    if 0=header then return ""
+    return header$
+  endif
   var t,i,c
   REM Add ':' character
   t$=args$(1)+":"
@@ -138,6 +181,7 @@ label connect
   endif
   REM Wait until connection
   do while 0=TCPSTATUS(0) and 0=TCPSTATUS(1)
+    REM TODO: error handling
     idle
   loop
 return
