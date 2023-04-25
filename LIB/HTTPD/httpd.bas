@@ -1,6 +1,6 @@
 REM Class HTTPD
 
-static private homedir,portnum,mime
+static private homedir,portnum,mime,cid
 static public URI,RHEADER,STATUS
 
 method INIT
@@ -29,6 +29,8 @@ method INIT
   loop
   fclose
   setdir d$
+  REM Start server
+  TCPSERVER portnum
 return
 
 method LASTURI
@@ -37,25 +39,35 @@ method LASTURI
 method START
   REM s: read buffer
   REM d: current directry
-  var s,d
+  REM r: coretimer() value
+  var s,d,c
   d$=getdir$()
-  REM Start server
-  TCPSERVER portnum
-  REM Wait for request
-
-print "Server started"
-print "WIFIERR=";WIFIERR()
-print "WIFIERR$=";WIFIERR$()
-
-  do until TCPSTATUS(1) : idle : loop
-
-print "Request received"
-
+  REM Connection-waiting loop follows
+  do
+    REM Wait for connection
+    delayms 10
+    cid=TCPACCEPT()
+    if 0=cid then continue
+    REM Wait for request
+    r=coretimer()
+    do
+      delayms 10
+      if 100000<coretimer()-r then break
+    loop until TCPSTATUS(1,cid)
+    if 0=TCPSTATUS(1,cid) then
+      REM Timeout
+      delayms 10
+      TCPCLOSE cid
+      continue
+    endif
+    break
+  loop
+  delayms 10
   REM Read request header
   RHEADER$=""
   dim s(64)
   do
-    i=TCPRECEIVE(s,256)
+    i=TCPRECEIVE(s,256,cid)
     poke s+i,0
     RHEADER$=RHEADER$+s$
   loop while 0<i
@@ -64,7 +76,6 @@ print "Request received"
     if gosub(openfile,4) then
       gosub sendheader
       gosub sendbody
-      fclose
       STATUS=200
     else
       gosub error404
@@ -73,7 +84,6 @@ print "Request received"
   elseif 0=strncmp(RHEADER$,"HEAD ",5) then
     if gosub(openfile,5) then
       gosub sendheader
-      fclose
       STATUS=200
     else
       gosub error404
@@ -84,12 +94,11 @@ print "Request received"
     gosub error403
     STATUS=403
   endif
-  REM Wait until all data will be sent
-  do while TCPSTATUS(2) : idle : loop
+  REM Wait for a while to send all data
+  delayms 10
   REM All done. Close connection (Connection: close)
-  TCPCLOSE
+  TCPCLOSE cid
   setdir d$
-  wait 20
 return URI$
 
 label error403
@@ -100,7 +109,7 @@ label error403
   t$=t$+"Connection: close\r\n"
   t$=t$+"\r\n"
   t$=t$+"<html><body>403 Method Not Allowed</body></html>"
-  TCPSEND(t$)
+  TCPSEND t$,len(t$),cid
 return
 
 label error404
@@ -111,7 +120,7 @@ label error404
   t$=t$+"Connection: close\r\n"
   t$=t$+"\r\n"
   t$=t$+"<html><body>404 Not Found</body></html>"
-  TCPSEND(t$)
+  TCPSEND t$,len(t$),cid
 return
 
 label getmime
@@ -164,7 +173,8 @@ label sendheader
     i=i+1
   loop
   if 0<m then
-    m$=gosub$(getmime,URI$(m))
+    m$=URI$(m)
+    m$=gosub$(getmime,m)
   elseif 1=i then
     m$="text/html"
   else
@@ -175,19 +185,18 @@ label sendheader
   t$=t$+"Content-Length: "+dec$(flen())+"\r\n"
   t$=t$+"Connection: close\r\n"
   t$=t$+"\r\n"
-  TCPSEND t$
-  do while TCPSTATUS(2) : idle : loop
+  TCPSEND t$,len(t$),cid
 return
 
 label sendbody
   var b,i
-  dim b(511)
+  dim b(127)
   do until feof()
     REM Get data from file
-    i=fget(b,2048)
+    i=fget(b,512)
     REM Wait until all data remaining will be sent
-    do while TCPSTATUS(2) : idle : loop
+    do while TCPSTATUS(2,cid) : delayms 10 : loop
     REM Send data to TCP client
-    TCPSEND b,i
+    TCPSEND b,i,cid
   loop
 return
