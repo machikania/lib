@@ -1,7 +1,7 @@
 REM Class HTTPD
 
-static private homedir,portnum,mime,cid
-static public URI,RHEADER,STATUS
+static private homedir,portnum,mime,cid,fname
+static public URI,RHEADER,STATUS,GPARAMS
 
 method INIT
   var i,d
@@ -41,27 +41,15 @@ method START
   REM d: current directry
   REM r: coretimer() value
   var s,d,c
+  URI$=""
+  GPARAMS$=""
   d$=getdir$()
   REM Connection-waiting loop follows
   do
-    REM Wait for connection
+    REM Wait for request
     delayms 10
     cid=TCPACCEPT()
-    if 0=cid then continue
-    REM Wait for request
-    r=coretimer()
-    do
-      delayms 10
-      if 100000<coretimer()-r then break
-    loop until TCPSTATUS(1,cid)
-    if 0=TCPSTATUS(1,cid) then
-      REM Timeout
-      delayms 10
-      TCPCLOSE cid
-      continue
-    endif
-    break
-  loop
+  loop until cid
   delayms 10
   REM Read request header
   RHEADER$=""
@@ -144,10 +132,23 @@ return l$
 
 label openfile
   var i,d,f
+  REM Construct URI
   i=args(1)
   do while 0x20!=peek(RHEADER+i) : i=i+1 : loop
   URI$=RHEADER$(args(1),i-args(1))
+  REM Construct full path to file (ignore ? and later characters)
   d$=homedir$+URI$
+  i=0
+  do while peek(d+i)
+    if 0x3f==peek(d+i) then
+      REM '?' found
+      GPARAMS$=d$(i)
+      poke d+i,0
+      break
+    endif
+    i=i+1
+  loop
+  REM Divide to directory path and file name
   i=0
   f=0
   do while peek(d+i)
@@ -158,25 +159,24 @@ label openfile
   if setdir(d$(0,f)) then return 0
   REM Open file
   if 0=peek(d+f) then
-    return fopen("index.htm","r")
+    fname$="index.htm"
   else
-    return fopen(d$(f),"r")
+    fname$=d$(f)
   endif
+return fopen(fname$,"r")
 
 label sendheader
   var t,i,m
   REM Get Mime
   i=0
   m=0
-  do while peek(URI+i)
-    if 0x2e=peek(URI+i) then m=i+1 : REM "."
+  do while peek(fname+i)
+    if 0x2e=peek(fname+i) then m=i+1 : REM "."
     i=i+1
   loop
   if 0<m then
-    m$=URI$(m)
+    m$=fname$(m)
     m$=gosub$(getmime,m)
-  elseif 1=i then
-    m$="text/html"
   else
     m$="application/octet-stream"
   endif
@@ -194,9 +194,49 @@ label sendbody
   do until feof()
     REM Get data from file
     i=fget(b,512)
-    REM Wait until all data remaining will be sent
-    do while TCPSTATUS(2,cid) : delayms 10 : loop
     REM Send data to TCP client
     TCPSEND b,i,cid
   loop
 return
+
+method GETPARAM
+  REM p: parameter name (and return string)
+  REM i: counter
+  REM l: text length
+  REM c: character
+  var i,p
+  if args(0)<1 then return GPARAMS$
+  l=len(GPARAMS$)
+  REM Find the parameter from name
+  p$=args$(1)+"="
+  REM Explore GPARAMS
+  i=0
+  do while i<l
+    REM Seek '?' or '&'
+    c=peek(GPARAMS+i) : i=i+1
+    if 0x3f!=c and 0x26!=c then continue
+    REM Check parameter name
+    if strncmp(p$,GPARAMS$(i),len(p$)) then continue
+    REM Parameter name found
+    i=i+len(p$)
+    p$=""
+    c=peek(GPARAMS+i)
+    do until 0x26=c or 0=c
+      if c=0x25 then
+        REM '%'
+        p$=p$+chr$(val("$"+GPARAMS$(i+1,2)))
+        i=i+3
+      elseif c=0x2b then
+        REM '+'
+        p$=p$+" "
+        i=i+1
+      else
+        p$=p$+chr$(c)
+        i=i+1
+      endif
+      c=peek(GPARAMS+i)
+    loop
+    return p$
+  loop
+  REM Parameter name not found
+return ""
