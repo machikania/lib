@@ -222,8 +222,7 @@ label connect
   TCPSEND t$
   REM Connect to server
   if s then
-    print "https not supported yet"
-    end
+    TLSCLIENT h$,p
   else
     TCPCLIENT h$,p
   endif
