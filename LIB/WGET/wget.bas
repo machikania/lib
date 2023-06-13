@@ -231,7 +231,7 @@ label connect
     REM TODO: error handling
     idle
   loop
-return
+return 0
 
 label gheader
   if ucheader then return 0
