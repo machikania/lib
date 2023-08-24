@@ -1,4 +1,5 @@
-REM MachiKania class WGET
+REM WGET.BAS ver 0.2
+REM MachiKania class WGET for type P
 
 static private pdata,header,ucheader
 
@@ -6,7 +7,10 @@ method FORSTRING
   var t,s,i
   if 1<args(0) then pdata$=args$(2)
   if gosub(connect,args(1)) then return ""
-  do while TCPSTATUS(0):idle:loop
+  do while TCPSTATUS(0)
+    if 1<WIFIERR() and WIFIERR()<5 then return ""
+    idle
+  loop
   t$=""
   dim s(64)
   do
@@ -29,6 +33,7 @@ method FORBUFFER
   t$=""
   dim s(64)
   do
+    if 1<WIFIERR() and WIFIERR()<5 then break
     i=TCPRECEIVE(s,256)
     if 0=i then
       idle
@@ -43,6 +48,7 @@ method FORBUFFER
     i=i-j+k
     j=j-k
     do while 0<i
+      if 1<WIFIERR() and WIFIERR()<5 then break
       if 0<l then
         poke b,peek(s+j)
         b=b+1:l=l-1
@@ -53,6 +59,7 @@ method FORBUFFER
   loop
   REM Get remaining data during connection
   do while TCPSTATUS(0)
+    if 1<WIFIERR() and WIFIERR()<5 then break
     i=TCPRECEIVE(b,l)
     if 0=i then
       idle
@@ -62,6 +69,7 @@ method FORBUFFER
   loop
   REM Get remaining data after dis-connection
   do
+    if 1<WIFIERR() and WIFIERR()<5 then break
     i=TCPRECEIVE(b,l)
     if 0=i then break
     b=b+i:l=l-i
@@ -81,6 +89,7 @@ method FORFILE
   t$=""
   dim s(64)
   do
+    if 1<WIFIERR() and WIFIERR()<5 then break
     i=TCPRECEIVE(s,256)
     if 0=i then
       idle
@@ -97,6 +106,7 @@ method FORFILE
   loop
   REM Get and save remaining data during connection
   do while TCPSTATUS(0)
+    if 1<WIFIERR() and WIFIERR()<5 then break
     i=TCPRECEIVE(s,256)
     if 0=i then
       idle
@@ -106,6 +116,7 @@ method FORFILE
   loop
   REM Get and save remaining data after dis-connection
   do
+    if 1<WIFIERR() and WIFIERR()<5 then break
     i=TCPRECEIVE(s,256)
     if 0=i then break
     fput s,i
@@ -222,13 +233,13 @@ label connect
   TCPSEND t$
   REM Connect to server
   if s then
-    TLSCLIENT h$,p
+    if TLSCLIENT(h$,p) then return 1
   else
-    TCPCLIENT h$,p
+    if TCPCLIENT(h$,p) then return 1
   endif
   REM Wait until connection
   do while 0=TCPSTATUS(0) and 0=TCPSTATUS(1)
-    REM TODO: error handling
+    if 0<WIFIERR() and WIFIERR()<5 then return 1
     idle
   loop
 return 0
