@@ -1,7 +1,7 @@
-REM WGET.BAS ver 0.2
+REM WGET.BAS ver 0.3
 REM MachiKania class WGET for type P
 
-static private pdata,header,ucheader
+static private pdata,header,ucheader,rheader
 
 method FORSTRING
   var t,s,i
@@ -167,6 +167,13 @@ method GETHEADER
   return ""
 return
 
+method ADDRHEADER
+  var c
+  rheader$=args$(1)
+  c$=rheader$(-2)
+  if peek(c)!=0x0d or peek(c+1)!=0x0a then rheader$=rheader$+"\r\n"
+return
+
 label connect
   REM t$: initially, args$(1)
   REM u$: URI
@@ -220,6 +227,7 @@ label connect
     t$=t$+"Accept: */*\r\n"
     t$=t$+"Host: "+h$+"\r\n"
     t$=t$+"Content-Length: "+dec$(len(pdata$))+"\r\n"
+    if rheader then t$=t$+rheader$
     t$=t$+"\r\n"
     t$=t$+pdata$
     pdata=0
@@ -228,8 +236,10 @@ label connect
     t$=t$+"Connection: Close\r\n"
     t$=t$+"Accept: */*\r\n"
     t$=t$+"Host: "+h$+"\r\n"
+    if rheader then t$=t$+rheader$
     t$=t$+"\r\n"
   endif
+  rheader=0
   TCPSEND t$
   REM Connect to server
   if s then
@@ -248,7 +258,7 @@ label gheader
   if ucheader then return 0
   var i,c
   header$=header$+args$(1)
-  for i=0 to len(t$)-5
+  for i=0 to len(args$(1))-5
     if peek(t+i+0)!=0x0d then continue
     if peek(t+i+1)!=0x0a then continue
     if peek(t+i+2)!=0x0d then continue
