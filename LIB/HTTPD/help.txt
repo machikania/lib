@@ -1,0 +1,48 @@
+＜クラス名およびバージョン＞
+HTTPD
+ver 0.1
+
+＜ファイル名＞
+HTTPD.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+Wifi接続時に、HTTPサーバーを構築するためのクラス。mimeはファイルの
+
+＜コンストラクター＞
+第一引数
+	ポート番号。省略した場合は、80。
+第二引数
+	サーバー公開するディレクトリー。省略した場合は、現在のディレクトリーを選択。
+
+＜メソッド＞
+START()
+	クライアントからの接続待ち。接続があれば、クライアントに返信した後に、このメソッドは終了する。
+
+LASTURI$()
+	前回接続時にリクエストされたURIを文字列として返す。
+
+GETPARAM$([x$])
+	前回接続時のURIに含まれる、GETメソッドのパラメーター情報を返す。x$を指定したときは、そのパラメーターの設定値を、x$を省略した時は、URIの「?」以降の文字列を返す。
+
+＜パブリックフィールド＞
+STATUS
+	前回接続時のステータス番号。200, 404など。
+
+＜使用例＞
+useclass HTTPD
+h=new(HTTPD,80,"/httproot")
+print "server started"
+do
+  h.START()
+  system 201,val(h.GETPARAM$("led"))
+loop
+
+<html><head><title>Test</title>
+<meta name="viewport" content="width=1, initial-scale=5"></head>
+<body>
+<h5 style="text-align:center"><a href="?led=1">ON</a></h5>
+<h5 style="text-align:center"><a href="?led=1">OFF</a></h5>
+</body></html>

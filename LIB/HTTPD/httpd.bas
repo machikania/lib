@@ -1,4 +1,4 @@
-REM Class HTTPD
+REM Class HTTPD ver 0.1
 
 static private homedir,portnum,mime,cid,fname
 static public URI,RHEADER,STATUS,GPARAMS
@@ -39,8 +39,8 @@ method LASTURI
 method START
   REM s: read buffer
   REM d: current directry
-  REM r: coretimer() value
-  var s,d,c
+  REM i: temporary integer
+  var s,d,i
   URI$=""
   GPARAMS$=""
   d$=getdir$()
