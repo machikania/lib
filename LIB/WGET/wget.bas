@@ -1,4 +1,4 @@
-REM WGET.BAS ver 0.3
+REM WGET.BAS ver 0.3.1
 REM MachiKania class WGET for type P
 
 static private pdata,header,ucheader,rheader
@@ -258,11 +258,11 @@ label gheader
   if ucheader then return 0
   var i,c
   header$=header$+args$(1)
-  for i=0 to len(args$(1))-5
-    if peek(t+i+0)!=0x0d then continue
-    if peek(t+i+1)!=0x0a then continue
-    if peek(t+i+2)!=0x0d then continue
-    if peek(t+i+3)!=0x0a then continue
+  for i=0 to len(header$)-4
+    if peek(header+i+0)!=0x0d then continue
+    if peek(header+i+1)!=0x0a then continue
+    if peek(header+i+2)!=0x0d then continue
+    if peek(header+i+3)!=0x0a then continue
     header$=header$(0,i+4)
     ucheader$=header$
     for i=0 to len(ucheader$)-1
