@@ -1,4 +1,4 @@
-REM Class HTTPD ver 0.1
+REM Class HTTPD ver 0.2
 
 static private homedir,portnum,mime,cid,fname
 static public URI,RHEADER,STATUS,GPARAMS
@@ -65,6 +65,9 @@ method START
       gosub sendheader
       gosub sendbody
       STATUS=200
+    elseif 0=strncmp(fname$,"index.htm",9) then
+      gosub dirlist
+      STATUS=200
     else
       gosub error404
       STATUS=404
@@ -115,6 +118,10 @@ label getmime
   REM args$(1): extension string
   var l,e,i,j
   e$=args$(1)+" "
+  REM to lower case
+  for i=0 to len(e$)-2
+    if 0x41<=peek(e+i) and peek(e+i)<=0x5a then poke e+i,peek(e+i)+0x20
+  next
   i=0
   do while peek(mime+i)
     j=i
@@ -197,6 +204,50 @@ label sendbody
     REM Send data to TCP client
     TCPSEND b,i,cid
   loop
+return
+
+label dirlist
+  var t,b,f
+  b$="<html><head>"
+  b$=b$+"<title>Index of "+URI$+"</title>"
+  b$=b$+"</head>\n<body>\n"
+  b$=b$+"<h1>Index of "+URI$+"</h1>\n"
+  b$=b$+"<table>\n"
+  b$=b$+"<tr><th>Name</th><th>Last modified</th><th>size</th><th>flags</th></tr>\n"
+  b$=b$+"<tr><th colspan=4><hr></th></tr>\n"
+  REM directory
+  if 1<len(URI$) then b$=b$+"<tr><td><b><a href='../'>&lt;..&gt;</a></b></td><td colspan=3></td></tr>\n"
+  f$=ffind$("*")
+  do while len(f$)
+    if finfo(3) and 0x10 then
+      b$=b$+"<tr><td>&nbsp;<b><a href='"+URI$+f$+"/'>&lt;"+f$+"&gt;</a></b>&nbsp;</td>"
+      b$=b$+"<td>&nbsp;<i>"+finfo$(1)+" "+finfo$(2)+"</i>&nbsp;</td>"
+      b$=b$+"<td></td>"
+      b$=b$+"<td>&nbsp;"+finfo$(3)+"&nbsp;</td><tr>\n"
+    endif
+    f$=ffind$()
+  loop
+  REM file
+  f$=ffind$("*")
+  do while len(f$)
+    if not(finfo(3) and 0x10) then
+      b$=b$+"<tr><td>&nbsp;<b><a href='"+URI$+f$+"'>"+f$+"</a></b>&nbsp;</td>"
+      b$=b$+"<td>&nbsp;<i>"+finfo$(1)+" "+finfo$(2)+"</i>&nbsp;</td>"
+      b$=b$+"<td>&nbsp;"+dec$(finfo(0))+"&nbsp;</td>"
+      b$=b$+"<td>&nbsp;"+finfo$(3)+"&nbsp;</td><tr>\n"
+    endif
+    f$=ffind$()
+  loop
+  b$=b$+"<tr><th colspan=4><hr></th></tr>\n"
+  b$=b$+"</table>\n"
+  b$=b$+"</body>\n</html>"
+  t$="HTTP/1.0 200 OK\r\n"
+  t$=t$+"Content-Type: text/html\r\n"
+  t$=t$+"Content-Length: "+dec$(len(b$))+"\r\n"
+  t$=t$+"Connection: close\r\n"
+  t$=t$+"\r\n"
+  t$=t$+b$
+  TCPSEND t$,len(t$),cid
 return
 
 method GETPARAM
