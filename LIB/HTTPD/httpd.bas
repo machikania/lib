@@ -216,7 +216,7 @@ label dirlist
   b$=b$+"<tr><th>Name</th><th>Last modified</th><th>size</th><th>flags</th></tr>\n"
   b$=b$+"<tr><th colspan=4><hr></th></tr>\n"
   REM directory
-  if 1<len(URI$) then b$=b$+"<tr><td><b><a href='../'>&lt;..&gt;</a></b></td><td colspan=3></td></tr>\n"
+  if 1<len(URI$) then b$=b$+"<tr><td>&nbsp;<b><a href='../'>&lt;..&gt;</a></b>&nbsp;</td><td colspan=3></td></tr>\n"
   f$=ffind$("*")
   do while len(f$)
     if finfo(3) and 0x10 then
