@@ -1,4 +1,4 @@
-REM Class HTTPD ver 0.2
+REM Class HTTPD ver 0.2.1
 
 static private homedir,portnum,mime,cid,fname
 static public URI,RHEADER,STATUS,GPARAMS
@@ -207,23 +207,24 @@ label sendbody
 return
 
 label dirlist
-  var t,b,f
-  b$="<html><head>"
-  b$=b$+"<title>Index of "+URI$+"</title>"
-  b$=b$+"</head>\n<body>\n"
-  b$=b$+"<h1>Index of "+URI$+"</h1>\n"
-  b$=b$+"<table>\n"
-  b$=b$+"<tr><th>Name</th><th>Last modified</th><th>size</th><th>flags</th></tr>\n"
-  b$=b$+"<tr><th colspan=4><hr></th></tr>\n"
+  var t,f
+  gosub opentemp
+  fprint "<html><head>";
+  fprint "<title>Index of "+URI$+"</title>";
+  fprint "</head>\n<body>\n";
+  fprint "<h1>Index of "+URI$+"</h1>"
+  fprint "<table>"
+  fprint "  <tr><th>Name</th><th>Last modified</th><th>size</th><th>flags</th></tr>"
+  fprint "  <tr><th colspan=4><hr></th></tr>"
   REM directory
-  if 1<len(URI$) then b$=b$+"<tr><td>&nbsp;<b><a href='../'>&lt;..&gt;</a></b>&nbsp;</td><td colspan=3></td></tr>\n"
+  if 1<len(URI$) then fprint "  <tr><td>&nbsp;<b><a href='../'>&lt;..&gt;</a></b>&nbsp;</td><td colspan=3></td></tr>"
   f$=ffind$("*")
   do while len(f$)
     if finfo(3) and 0x10 then
-      b$=b$+"<tr><td>&nbsp;<b><a href='"+URI$+f$+"/'>&lt;"+f$+"&gt;</a></b>&nbsp;</td>"
-      b$=b$+"<td>&nbsp;<i>"+finfo$(1)+" "+finfo$(2)+"</i>&nbsp;</td>"
-      b$=b$+"<td></td>"
-      b$=b$+"<td>&nbsp;"+finfo$(3)+"&nbsp;</td><tr>\n"
+      fprint "  <tr><td>&nbsp;<b><a href='"+URI$+f$+"/'>&lt;"+f$+"&gt;</a></b>&nbsp;</td>";
+      fprint "<td>&nbsp;<i>"+finfo$(1)+" "+finfo$(2)+"</i>&nbsp;</td>";
+      fprint "<td></td>";
+      fprint "<td>&nbsp;"+finfo$(3)+"&nbsp;</td><tr>"
     endif
     f$=ffind$()
   loop
@@ -231,24 +232,41 @@ label dirlist
   f$=ffind$("*")
   do while len(f$)
     if not(finfo(3) and 0x10) then
-      b$=b$+"<tr><td>&nbsp;<b><a href='"+URI$+f$+"'>"+f$+"</a></b>&nbsp;</td>"
-      b$=b$+"<td>&nbsp;<i>"+finfo$(1)+" "+finfo$(2)+"</i>&nbsp;</td>"
-      b$=b$+"<td>&nbsp;"+dec$(finfo(0))+"&nbsp;</td>"
-      b$=b$+"<td>&nbsp;"+finfo$(3)+"&nbsp;</td><tr>\n"
+      fprint "  <tr><td>&nbsp;<b><a href='"+URI$+f$+"'>"+f$+"</a></b>&nbsp;</td>";
+      fprint "<td>&nbsp;<i>"+finfo$(1)+" "+finfo$(2)+"</i>&nbsp;</td>";
+      fprint "<td>&nbsp;"+dec$(finfo(0))+"&nbsp;</td>";
+      fprint "<td>&nbsp;"+finfo$(3)+"&nbsp;</td><tr>"
     endif
     f$=ffind$()
   loop
-  b$=b$+"<tr><th colspan=4><hr></th></tr>\n"
-  b$=b$+"</table>\n"
-  b$=b$+"</body>\n</html>"
+  fprint "  <tr><th colspan=4><hr></th></tr>"
+  fprint "</table>"
+  fprint "</body>"
+  fprint "</html>"
+  REM Send header
   t$="HTTP/1.0 200 OK\r\n"
   t$=t$+"Content-Type: text/html\r\n"
-  t$=t$+"Content-Length: "+dec$(len(b$))+"\r\n"
+  t$=t$+"Content-Length: "+dec$(flen())+"\r\n"
   t$=t$+"Connection: close\r\n"
   t$=t$+"\r\n"
-  t$=t$+b$
   TCPSEND t$,len(t$),cid
+  REM Send body
+  dim t(127) :rem 512 bytes buffer
+  fseek 0
+  do until feof()
+    f=fget(t,512)
+    TCPSEND t,f,cid
+  loop
+  fclose
 return
+
+label opentemp
+  var c,r
+  c$=getdir$()
+  setdir "/lib/httpd/"
+  r=fopen("tempfile.tmp","w+")
+  setdir c$
+return r
 
 method GETPARAM
   REM p: parameter name (and return string)
