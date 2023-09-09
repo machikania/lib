@@ -1,6 +1,6 @@
-REM Class HTTPD ver 0.2.1
+REM Class HTTPD ver 0.3
 
-static private homedir,portnum,mime,cid,fname
+static private homedir,portnum,mime,cid,fname,phandler,chandler
 static public URI,RHEADER,STATUS,GPARAMS
 
 method INIT
@@ -36,6 +36,14 @@ return
 method LASTURI
   return URI$
 
+method POSTHANDLER
+  phandler=args(1)
+return
+
+method CGIHANDLER
+  chandler=args(1)
+return
+
 method START
   REM s: read buffer
   REM d: current directry
@@ -54,11 +62,14 @@ method START
   REM Read request header
   RHEADER$=""
   dim s(64)
+  gosub opentemp
   do
     i=TCPRECEIVE(s,256,cid)
     poke s+i,0
     RHEADER$=RHEADER$+s$
+    fput s,i
   loop while 0<i
+  fclose
   REM Check method
   if 0=strncmp(RHEADER$,"GET ",4) then
     if gosub(openfile,4) then
@@ -68,6 +79,8 @@ method START
     elseif 0=strncmp(fname$,"index.htm",9) then
       gosub dirlist
       STATUS=200
+    elseif (0=strncmp(fname$(-4),".cgi",3) or 0=strncmp(fname$(-4),".CGI",3)) and chandler!=0 then
+      gosub postORcgi,chandler
     else
       gosub error404
       STATUS=404
@@ -80,6 +93,8 @@ method START
       gosub error404
       STATUS=404
     endif
+  elseif 0=strncmp(RHEADER$,"POST ",5) and phandler!=0 then
+    gosub postORcgi,phandler
   else
     URI$=""
     gosub error403
@@ -91,6 +106,38 @@ method START
   TCPCLOSE cid
   setdir d$
 return URI$
+
+REM The POST handler must do:
+REM   1. Obtain the request from client. It is saved in a file [args$(1)] in the directory [args$(2)]
+REM   2. Return a string containing response to client including header
+REM
+REM The CGI handler must do:
+REM   1. Obtain header from client as HTTPD::$RHEADER
+REM   2. Return a string containing response to client including header
+
+label postORcgi
+  REM Set URI$, first
+  gosub constructuri,5
+  s$=gosub$(goto_phandler,"TEMPFILE.TMP","/LIB/HTTPD/",homedir$,args(1))
+  REM Set STATUS
+  i=0
+  do while 0x20<peek(s+i) : i=i+1 : loop
+  STATUS=val(s$(i))
+  REM Send the response from POST handler to net client
+  do while len(s$)
+    if len(s$)<=512 then
+      TCPSEND s,len(s$),cid
+      break
+    else
+      TCPSEND s,512,cid
+      s$=s$(512)        
+    endif
+  loop
+return
+
+label goto_phandler
+  call args(4) : rem r0=phandler or r0=cheader
+  exec 0x4700   : rem bx r0
 
 label error403
   var t
@@ -137,12 +184,18 @@ label getmime
   if 0=peek(mime+i) then l$="application/octet-stream"
 return l$
 
-label openfile
-  var i,d,f
+label constructuri
+  var i
   REM Construct URI
   i=args(1)
   do while 0x20!=peek(RHEADER+i) : i=i+1 : loop
   URI$=RHEADER$(args(1),i-args(1))
+return
+
+label openfile
+  var i,d,f
+  REM Construct URI
+  gosub constructuri,args(1)
   REM Construct full path to file (ignore ? and later characters)
   d$=homedir$+URI$
   i=0
@@ -263,8 +316,8 @@ return
 label opentemp
   var c,r
   c$=getdir$()
-  setdir "/lib/httpd/"
-  r=fopen("tempfile.tmp","w+")
+  setdir "/LIB/HTTPD/"
+  r=fopen("TEMPFILE.TMP","w+")
   setdir c$
 return r
 
