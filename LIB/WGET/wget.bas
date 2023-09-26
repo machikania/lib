@@ -1,4 +1,4 @@
-REM WGET.BAS ver 0.3.1
+REM WGET.BAS ver 0.3.2
 REM MachiKania class WGET for type P
 
 static private pdata,header,ucheader,rheader
@@ -24,13 +24,12 @@ method FORSTRING
 return t$
 
 method FORBUFFER
-  var b,l,t,s,i,j,k
+  var b,l,s,i,j,k
   if 3<args(0) then pdata$=args$(4)
   if gosub(connect,args(3)) then return 0
-  b=args(2) :REM Buffer
-  l=args(1) :REM Buffer length
+  b=args(1) :REM Buffer
+  l=args(2) :REM Buffer length
   REM Get header
-  t$=""
   dim s(64)
   do
     if 1<WIFIERR() and WIFIERR()<5 then break
@@ -40,9 +39,8 @@ method FORBUFFER
       continue
     endif
     poke s+i,0
-    k=len(t$)
-    t$=t$+s$
-    j=gosub(gheader,t$)
+    k=len(header$)
+    j=gosub(gheader,s$)
     if 0=j then continue
     REM Copy after header
     i=i-j+k
@@ -76,17 +74,16 @@ method FORBUFFER
   loop
   i=TCPSTATUS(1)
   TCPCLOSE
-  if i then return i+args(1)
-return args(1)-l
+  if i then return i+args(2)
+return args(2)-l
 
 method FORFILE
-  var t,s,i,j,k
+  var s,i,j,k
   if 2<args(0) then pdata$=args$(3)
   if gosub(connect,args(2)) then return 0
   REM Open a file
   fopen args$(1),"w"
   REM Get header
-  t$=""
   dim s(64)
   do
     if 1<WIFIERR() and WIFIERR()<5 then break
@@ -96,9 +93,8 @@ method FORFILE
       continue
     endif
     poke s+i,0
-    k=len(t$)
-    t$=t$+s$
-    j=gosub(gheader,t$)
+    k=len(header$)
+    j=gosub(gheader,s$)
     if 0=j then continue
     REM Save after header
     fput s+j-k,i-j+k
