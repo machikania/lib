@@ -57,7 +57,7 @@ print WGET::GETHEADER$()
 
 useclass WGET
 dim b(6749): REM 6749=27000/4-1
-i=WGET::FORBUFFER(27000,b,"http://abehiroshi.la.coocan.jp/abe-top-20190328-2.jpg")
+i=WGET::FORBUFFER(b,27000,"http://abehiroshi.la.coocan.jp/abe-top-20190328-2.jpg")
 print i
 print WGET::GETHEADER$()
 fopen "abe2.jpg","w"
