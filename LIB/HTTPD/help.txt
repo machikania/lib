@@ -1,6 +1,6 @@
 ＜クラス名およびバージョン＞
 HTTPD
-ver 0.3.0
+ver 0.3.1
 
 ＜ファイル名＞
 HTTPD.BAS
@@ -68,5 +68,5 @@ loop
 <meta name="viewport" content="width=1, initial-scale=5"></head>
 <body>
 <h5 style="text-align:center"><a href="?led=1">ON</a></h5>
-<h5 style="text-align:center"><a href="?led=1">OFF</a></h5>
+<h5 style="text-align:center"><a href="?led=0">OFF</a></h5>
 </body></html>

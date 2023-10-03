@@ -1,6 +1,6 @@
-REM Class HTTPD ver 0.3
+REM Class HTTPD ver 0.3.1
 
-static private homedir,portnum,mime,cid,fname,phandler,chandler
+static private homedir,portnum,mime,cid,fname,phandler,chandler,postmode
 static public URI,RHEADER,STATUS,GPARAMS
 
 method INIT
@@ -62,14 +62,14 @@ method START
   REM Read request header
   RHEADER$=""
   dim s(64)
-  gosub opentemp
+  if postmode then gosub opentemp
   do
     i=TCPRECEIVE(s,256,cid)
     poke s+i,0
     RHEADER$=RHEADER$+s$
-    fput s,i
+    if postmode then fput s,i
   loop while 0<i
-  fclose
+  if postmode then fclose
   REM Check method
   if 0=strncmp(RHEADER$,"GET ",4) then
     if gosub(openfile,4) then
