@@ -1,4 +1,4 @@
-REM Class HTTPD ver 0.3.1
+REM Class HTTPD ver 0.3.2
 
 static private homedir,portnum,mime,cid,fname,phandler,chandler,postmode
 static public URI,RHEADER,STATUS,GPARAMS
@@ -73,9 +73,8 @@ method START
   REM Check method
   if 0=strncmp(RHEADER$,"GET ",4) then
     if gosub(openfile,4) then
-      gosub sendheader
-      gosub sendbody
-      STATUS=200
+      STATUS=gosub(sendheader)
+      if 200=STATUS then gosub sendbody
     elseif 0=strncmp(fname$,"index.htm",9) then
       gosub dirlist
       STATUS=200
@@ -87,8 +86,7 @@ method START
     endif
   elseif 0=strncmp(RHEADER$,"HEAD ",5) then
     if gosub(openfile,5) then
-      gosub sendheader
-      STATUS=200
+      STATUS=gosub(sendheader)
     else
       gosub error404
       STATUS=404
@@ -141,12 +139,12 @@ label goto_phandler
 
 label error403
   var t
-  t$="HTTP/1.0 403 Method Not Allowed\r\n"
+  t$="HTTP/1.0 403 Forbidden\r\n"
   t$=t$+"Content-Type: text/html\r\n"
   t$=t$+"Content-Length: 48\r\n"
   t$=t$+"Connection: close\r\n"
   t$=t$+"\r\n"
-  t$=t$+"<html><body>403 Method Not Allowed</body></html>"
+  t$=t$+"<html><body>403 Forbidden</body></html>"
   TCPSEND t$,len(t$),cid
 return
 
@@ -240,13 +238,24 @@ label sendheader
   else
     m$="application/octet-stream"
   endif
-  t$="HTTP/1.0 200 OK\r\n"
-  t$=t$+"Content-Type: "+m$+"\r\n"
-  t$=t$+"Content-Length: "+dec$(flen())+"\r\n"
-  t$=t$+"Connection: close\r\n"
-  t$=t$+"\r\n"
-  TCPSEND t$,len(t$),cid
-return
+  if 0x60<peek(m) then
+    REM 200 OK
+    t$="HTTP/1.0 200 OK\r\n"
+    t$=t$+"Content-Type: "+m$+"\r\n"
+    t$=t$+"Content-Length: "+dec$(flen())+"\r\n"
+    t$=t$+"Connection: close\r\n"
+    t$=t$+"\r\n"
+    TCPSEND t$,len(t$),cid
+    return 200
+  endif
+  REM mime is either 404 or 403
+  m=val(m$)
+  if 404=m then
+    gosub error404
+  else
+    gosub error403
+  endif
+return m
 
 label sendbody
   var b,i
