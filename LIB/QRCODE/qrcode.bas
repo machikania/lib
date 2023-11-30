@@ -1,11 +1,12 @@
 REM ************************
-REM * Class QRCODE ver 0.1 *
+REM * Class QRCODE ver 0.2 *
 REM *  written by Katsumi  *
 REM ************************
 
 useclass CLDHEX
 static private C_CODE
-field QRC,QSIZE
+field public QSIZE
+field private QRC
 
 rem Constructor
 rem 1st argument: string for the code
@@ -44,15 +45,12 @@ method INIT
 return
 
 rem DRAWQR method
-rem 1st argument: dot width          (default: 4)
-rem 2nd argument: border width       (default: 4)
-rem 3rd argument: color palette      (default: 0)
-rem 4th argument: background palette (default: 7)
+rem 1st argument (var d): dot width          (default: 4)
+rem 2nd argument (var b): border width       (default: 4)
+rem 3rd argument (var c): color palette      (default: 0)
+rem 4th argument (var p): background palette (default: 7)
 
 method DRAWQR
-  var x,y,i,j
-  x=system(28)
-  y=system(29)
   rem Parameters
   var d,b,c,p
   d=4:b=4:c=0:p=7
@@ -60,8 +58,12 @@ method DRAWQR
   if 1<args(0) then b=args(2)
   if 2<args(0) then c=args(3)
   if 3<args(0) then p=args(4)
-  rem draw border
   b=b*d
+  rem axes values
+  var x,y,i,j
+  x=system(28)+b
+  y=system(29)+b
+  rem draw border
   if b then boxfill x-b,y-b,x+QSIZE*d-1+b,y+QSIZE*d-1+b,p
   rem draw QR code
   for i=0 to QSIZE-1
@@ -70,6 +72,12 @@ method DRAWQR
     next
   next
 return
+
+method GETMODULE
+  var x,y
+  x=args(1)
+  y=args(2)
+return gosub(C_QRCODEGEN_GETMODULE,QRC,x,y)
 
 label INIT_C_LDHEX
   var a
