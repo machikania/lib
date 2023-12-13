@@ -1,4 +1,4 @@
-REM GEN3O.BAS ver 0.2
+REM GEN3O.BAS ver 0.2.1
 REM Class GEN3O for MachiKania type Z/M/P
 REM using Saurce Han Sans Japanese font
 
@@ -8,10 +8,20 @@ REM General data used for all objects
 static private FBUFF,FBSIZE
 
 REM Object fields
-field private ENCODE,FULLW,HALFW,HEIGHT
+field private ENCODE,FULLW,HALFW,HEIGHT,BOLD
 field public DWIDTH
 
 method INIT
+  REM args(3): Bold or not
+  if 2<args(0) then
+    if args(3) and 1 then
+      BOLD=1
+    else
+      BOLD=0
+    endif
+  else
+    BOLD=1
+  endif
   REM args(1): Font size
   if args(1)=58 then
     REM 48x58/32x58 font
@@ -167,7 +177,11 @@ label DRAWH
   c=args(2)
   if c<0x20 or 0x7e<c then c=0x3f
   rem Read from file
-  fopen "half"+dec$(HEIGHT)+".bin","r"
+  if BOLD then
+    fopen "half"+dec$(HEIGHT)+".bin","r"
+  else
+    fopen "half"+dec$(HEIGHT)+"p.bin","r"
+  endif
   fseek ((HALFW+7)>>3)*HEIGHT*(c-0x20)
   fget FBUFF,((HALFW+7)>>3)*HEIGHT
   fclose
@@ -205,7 +219,11 @@ label DRAWF
   c=args(2)
   if c<0x20 or 0x7e<c then c=0x3f
   rem Read from file
-  fopen "full"+dec$(HEIGHT)+".bin","r"
+  if BOLD then
+    fopen "full"+dec$(HEIGHT)+".bin","r"
+  else
+    fopen "full"+dec$(HEIGHT)+"p.bin","r"
+  endif
   j=args(2)
   if j<=0x287f then
     j=j-0x2120
