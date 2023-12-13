@@ -1,4 +1,4 @@
-REM GEN3O.BAS ver 0.1
+REM GEN3O.BAS ver 0.2
 REM Class GEN3O for MachiKania type Z/M/P
 REM using Saurce Han Sans Japanese font
 
@@ -22,8 +22,27 @@ method INIT
     FULLW=48
     HALFW=32
     HEIGHT=58
+  elseif args(1)=44 then
+    REM 36x44/24x44 font
+    if FBSIZE<198 then
+      dim FBUFF(49)
+      FBSIZE=198
+    endif
+    FULLW=36
+    HALFW=24
+    HEIGHT=44
+  elseif args(1)=29 then
+    REM 24x29/16x29 font
+    if FBSIZE<87 then
+      dim FBUFF(21)
+      FBSIZE=87
+    endif
+    FULLW=24
+    HALFW=16
+    HEIGHT=29
   else
     print "GEN3O: Illegal font size: ";args(1)
+    print "Valid size: 29, 44 or 58"
     end
   endif
   REM args$(2): Encoding type
@@ -86,10 +105,13 @@ method GETBMP
   rem c: color of character
   rem b: color of background
   rem j: JIS code
-  var t,m,p
+  rem d: current directory or temporary font data
+  var t,m,p,c,b,j,d
   t=args(1)
   c=args(2)
   b=args(3)
+  d$=getdir$()
+  setdir "\\LIB\\GEN3O"
   gosub getwid,t
   m=new(MA,DWIDTH*HEIGHT)
   p=m.memadr
@@ -110,6 +132,7 @@ method GETBMP
       p=p+FULLW
     endif
   loop
+  setdir d$
 return m
 
 rem GPRT methid
@@ -128,15 +151,6 @@ method GPRT
   point system(28)+DWIDTH,system(29)
 return
 
-rem OPFULL subroutine
-
-label OPFULL
-  var t,d,f
-  d$=getdir$()
-  setdir "/LIB/GEN3O"
-  fopen "full"+dec$(HEIGHT)+".bin","r"
-  fseek ((HALFW+7)>>3)*HEIGHT
-
 rem DRAWH subroutine
 rem args(1): pointer to draw a character
 rem args(2): ascii code
@@ -145,7 +159,7 @@ rem args(4): color of background
 
 label DRAWH
   rem c: character
-  rem d: current directory or temporary font data
+  rem d: temporary font data
   rem x: x axis
   rem y: y axis
   var c,d,x,y
@@ -153,13 +167,10 @@ label DRAWH
   c=args(2)
   if c<0x20 or 0x7e<c then c=0x3f
   rem Read from file
-  d$=getdir$()
-  setdir "\\LIB\\GEN3O"
   fopen "half"+dec$(HEIGHT)+".bin","r"
   fseek ((HALFW+7)>>3)*HEIGHT*(c-0x20)
   fget FBUFF,((HALFW+7)>>3)*HEIGHT
   fclose
-  setdir d$
   rem copy data to canvas
   for y=0 to HEIGHT-1
     for x=0 to HALFW
@@ -185,17 +196,15 @@ rem args(4): color of background
 
 label DRAWF
   rem c: character
-  rem d: current directory or temporary font data
+  rem d: temporary font data
   rem x: x axis
   rem y: y axis
   rem j: JIS code
-  var c,d,x,y
+  var c,d,x,y,j
   rem Fetch ascii code
   c=args(2)
   if c<0x20 or 0x7e<c then c=0x3f
   rem Read from file
-  d$=getdir$()
-  setdir "\\LIB\\GEN3O"
   fopen "full"+dec$(HEIGHT)+".bin","r"
   j=args(2)
   if j<=0x287f then
@@ -208,7 +217,6 @@ label DRAWF
   fseek ((FULLW+7)>>3)*HEIGHT*j
   fget FBUFF,((FULLW+7)>>3)*HEIGHT
   fclose
-  setdir d$
   rem copy data to canvas
   for y=0 to HEIGHT-1
     for x=0 to FULLW
@@ -255,16 +263,9 @@ rem UNI2J subroutine
 rem args(1): Unicode
 
 label UNI2J
-  var d,j
-  d$=getdir$()
-  setdir "\\LIB\\GEN3O"
+  var j
   fopen "uni2jis.bin","r"
   fseek args(1)*2
   fget &j,2
   fclose
-  setdir d$
 return j and 0xffff
-
-label enderr
-  print "GEN3O: ";args$(1)
-  end
