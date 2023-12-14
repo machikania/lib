@@ -1,4 +1,4 @@
-REM GEN3O.BAS ver 0.2.1
+REM GEN3O.BAS ver 0.2.2
 REM Class GEN3O for MachiKania type Z/M/P
 REM using Saurce Han Sans Japanese font
 
@@ -23,7 +23,25 @@ method INIT
     BOLD=1
   endif
   REM args(1): Font size
-  if args(1)=58 then
+  if args(1)=118 then
+    REM 96x118/64x118 font
+    if FBSIZE<1416 then
+      dim FBUFF(353)
+      FBSIZE=1416
+    endif
+    FULLW=96
+    HALFW=64
+    HEIGHT=118
+  elseif args(1)=88 then
+    REM 72x88/48x88 font
+    if FBSIZE<792 then
+      dim FBUFF(197)
+      FBSIZE=792
+    endif
+    FULLW=72
+    HALFW=48
+    HEIGHT=88
+  elseif args(1)=58 then
     REM 48x58/32x58 font
     if FBSIZE<348 then
       dim FBUFF(86)
