@@ -1,4 +1,4 @@
-REM GEN3O.BAS ver 0.2.2
+REM GEN3O.BAS ver 0.3
 REM Class GEN3O for MachiKania type Z/M/P
 REM using Saurce Han Sans Japanese font
 
@@ -20,7 +20,7 @@ method INIT
       BOLD=0
     endif
   else
-    BOLD=1
+    BOLD=0
   endif
   REM args(1): Font size
   if args(1)=118 then
@@ -163,20 +163,55 @@ method GETBMP
   setdir d$
 return m
 
-rem GPRT methid
+rem GPRT method
 rem args$(1): string
 rem args(2):  color of character
 rem args(3):  color of background
 
 method GPRT
-  var t,c,b,m
+  var t,c,b,m,a,l
   t=args(1)
   c=args(2)
   b=args(3)
-  m=gosub(GETBMP,t,c,b)
-  putbmp ,DWIDTH,HEIGHT,m
-  delete m
-  point system(28)+DWIDTH,system(29)
+  REM a: a character, l: character byte length
+  do
+    a=peek(t)
+    if 0=a then break
+    if ENCODE=1 then
+      REM EUC-JP
+      if a<0x80 then
+        l=1
+      else
+        l=2
+      endif
+    else
+      REM UTF-8
+      if a<0x80 then
+        l=1
+      elseif a<0xe0 then
+        l=2
+      elseif a<0xf0 then
+        l=3
+      else
+        l=4
+      endif
+    endif
+    if 0x0d=a then
+      rem Carriage Return
+      point 0,system(29)+HEIGHT
+    else
+      a$=t$(0,l)
+      m=gosub(GETBMP,a,c,b)
+      if system(22)<system(28)+DWIDTH then
+        rem Carriage Return
+        point 0,system(29)+HEIGHT
+      endif
+      putbmp ,DWIDTH,HEIGHT,m
+      delete m
+      point system(28)+DWIDTH,system(29)
+    endif
+    t=t+l
+  loop
 return
 
 rem DRAWH subroutine
