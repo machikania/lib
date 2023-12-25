@@ -1,4 +1,4 @@
-REM CKNJ12.BAS ver 0.4
+REM CKNJ12.BAS ver 0.5
 REM Class CKNJ12 for MachiKania Type Z/M/P
 REM using Shinonome 12x12 font
 
@@ -184,6 +184,17 @@ LABEL GPRTHS
   endif
   return
 
+REM Private method DOCR
+LABEL DOCR
+  if MODE and 0x100 then
+    REM GETBMP mode
+    REM do nothing
+  else
+    REM GPRT mode
+    point 0,SYSTEM(29)+12
+  endif
+  return
+
 REM Private method FOP
 REM 1st param: file name
 LABEL FOP
@@ -286,6 +297,13 @@ LABEL EUCSTR
       REM 7 bit character
       gosub GPRTCH,b
       i=i+1
+    elseif 0x0d=b then
+      REM Carriage Return
+      gosub DOCR
+      i=i+1
+    elseif 0x00<=b and b<=0x1f then
+      REM Invalid character
+      i=i+1
     endif
   wend
   return
@@ -310,6 +328,13 @@ LABEL UTFSTR
     elseif 0x20<=b and b<0x80 then
       REM 7 bit character
       gosub GPRTCH,b
+      i=i+1
+    elseif 0x0d=b then
+      REM Carriage Return
+      gosub DOCR
+      i=i+1
+    elseif 0x00<=b and b<=0x1f then
+      REM Invalid character
       i=i+1
     endif
   wend
