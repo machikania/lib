@@ -1,4 +1,4 @@
-REM CKNJ8.BAS ver 0.4
+REM CKNJ8.BAS ver 0.5
 REM Class CKNJ8 for MachiKania Type Z/M/P
 REM using Misaki 8x8 font
 
@@ -53,7 +53,19 @@ METHOD GPRT
   fclose
   FO=0
   t$=gosub$(MKSTR,args$(1))
-  gprint ,args(2),args(3),t$
+  j=len(t$)-1
+  for i=0 to j
+    b=peek(t+i)
+    if 0x0d=b then
+      REM Carriage Return
+      point 0,system(29)+8
+      continue
+    elseif system(22)<system(28)+8 then
+      REM Carriage Return
+      point 0,system(29)+8
+    endif
+    gprint ,args(2),args(3),chr$(b)
+  next
   fclose
   return
 
