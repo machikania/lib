@@ -1,0 +1,75 @@
+＜クラス名およびバージョン＞
+GEN3O
+ver 0.3
+
+＜ファイル名＞
+GEN3O.BAS
+full*.bin (合計10個)
+half*.bin (合計10個)
+uni2jis.bin
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。*.binファイルはすべて、次のプロジェクトによ
+り作成されている：
+https://github.com/kmorimatsu/gen3o_class
+
+full*.binとhalf*.binは、Source Han Code JPをもとに作成されており、ライセンスは
+SIL Open Font License ver 1.1.である。詳しくは、以下のURLを参照：
+https://github.com/adobe-fonts/source-han-code-jp
+
+uni2jis.binのライセンスについては、以下のURLを参照：
+https://www.unicode.org/copyright.html
+
+＜概要＞
+日本語表示クラス。源ノ角ゴシックを使用し、グラフィックディスプレイに日本語を
+含む文字列を表示する。文字コードは、EUC-JP, UTF-8に対応。
+
+＜コンストラクター＞
+第１引数
+	フォントサイズ（縦方向のピクセル数）を指定。有効値は、29, 44, 58, 88, 118。
+第２引数
+	文字コードとして、"EUC-JP", "UTF-8"のいずれかを選択。省略した場合は、
+	"EUC-JP"。
+第３引数（オプション）
+	太文字にしたい時は１を指定。通常文字は０（デフォルト）。
+
+＜パブリックフィールド＞
+なし
+
+＜パブリックスタティックフィールド＞
+DWIDTH
+	GETBMPメソッドで得られたデータの横幅をドット数で保持する。
+
+＜パブリックメソッド＞
+GPRT(x$,y,z)
+	日本語を含む文字列x$を、グラフィックディスプレイに表示する。yは文字色、zは
+	背景色を指定。表示がディスプレイの右端に到達した時と、改行コードを認識した
+	時、表示位置は一段下の左端に移る。
+
+GETBMP(x$,y,z)
+	日本語を含む文字列x$を、PUTBMPステートメントで用いるための配列データー(オブ
+	ジェクト)に変換し、データーへのポインターを返す。yは文字色、zは背景色を指定。
+	データーの横ドット数は、DWIDTHフィールドで取得する事ができる。なお、戻り値
+	で得られたオブジェクトは、使用後はDELETEすること。
+
+＜使用例＞
+日本語表示例。この場合は、BASファイルをUTF-8(BOMなし)で保存する事。
+
+USECLASS GEN3O
+USEGRAPHIC
+POINT 0,50
+K=new(GEN3O,44,"UTF-8")
+K.GPRT("本日は晴天なり",7,0)
+A$=INPUT$()
+
+
+GETBMPメソッドは、以下の例のように使用する。
+
+USECLASS GEN3O
+USEGRAPHIC
+POINT 0,50
+K=new(GEN3O,44,"UTF-8")
+B=K.GETBMP("本日は晴天なり",7,0)
+PUTBMP ,K.DWIDTH,44,B
+DELETE B
+A$=INPUT$()
