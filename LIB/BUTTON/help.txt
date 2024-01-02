@@ -1,0 +1,60 @@
+＜クラス名およびバージョン＞
+BUTTON
+ver 1.0
+
+＜ファイル名＞
+BUTTON.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン
+
+＜概要＞
+MachiKaniaシリーズに標準搭載の上下左右、START、FIREボタンを使いやすくする
+
+＜コンストラクター＞
+NEW(BUTTON)
+
+＜パブリックフィールド＞
+RD()メソッドを呼び出すと以下のフィールド変数が更新される
+
+BTN
+　各ビットにボタンの状態を格納
+　KEYS()関数で読み取った値そのもの
+
+BUP、BDN、BLT、BRT、BST、BFR
+　上下左右、START、FIREボタンの押下状態
+　0以外で押されている、0で離している
+
+BUP2、BDN2、BLT2、BRT2、BST2、BFR2
+　上下左右、START、FIREそれぞれのボタンで、前回押されておらず今回押された場合に0以外となる
+　離しているまたは押し続けている場合は0
+
+BUP3、BDN3、BLT3、BRT3、BST3、BFR3
+　上下左右、START、FIREそれぞれのボタンで、前回押していて今回離された場合に0以外となる
+　押されているまたは離し続けている場合は0
+
+BUPCT、BDNCT、BLTCT、BRTCT、BSTCT、BFRCT
+　上下左右、START、FIREそれぞれのボタンで、継続して押し続けている回数のカウンタ
+　RD()メソッドを呼び出したときに押し続けているとカウントアップし、離すと0になる
+
+＜パブリックメソッド＞
+RD()
+　ボタンの状態を読み取り、各フィールド変数を更新する
+　一定間隔で定期的に読み取る必要あり
+
+＜使用例＞
+右、左ボタンで変数Cを1ずつ増または減させる
+一度離さないと増減しないが、1秒間押し続けると高速に反応する
+
+USECLASS BUTTON
+B=NEW(BUTTON)
+C=0
+DO
+ B.RD()
+ CURSOR 0,10:PRINT C;" ";
+ IF B.BRT2 THEN C=C+1
+ IF B.BRTCT>60 THEN C=C+1
+ IF B.BLT2 THEN C=C-1
+ IF B.BLTCT>60 THEN C=C-1
+ WAIT 1
+LOOP
