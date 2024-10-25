@@ -1,6 +1,6 @@
 ＜クラス名およびバージョン＞
 QRCODE
-ver 0.2
+ver 0.2.1
 
 ＜ファイル名＞
 QRCODE.BAS
@@ -36,6 +36,8 @@ point 100,100
 q.DRAWQR()
 
 ＜バージョン履歴＞
+・ver 0.2.1
+　・Raspberry Pi Pico 2 に対応（MachiKania ver 1.4.2以降が必要）
 ・ver 0.2
 　・グラフィックの描画位置について、ボーダー領域も含めた画像の位置を指定する形に変更。
 　・GETMODULE()メソッドを追加。

@@ -16,3 +16,6 @@ pico_add_extra_outputs(${ENV_TARGET})
 
 # use user linker script
 pico_set_linker_script(${ENV_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/lds/${ENV_LINKER_SCRIPT})
+
+# create hex file
+pico_add_hex_output(${ENV_TARGET})
