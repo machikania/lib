@@ -1,4 +1,4 @@
-REM WS2812B Serial LED Control Class for MachiKania type P
+REM WS2812B Serial LED Control Class for MachiKania type P (RP2040)
 REM WS2812B.BAS
 
 REM Connection:
