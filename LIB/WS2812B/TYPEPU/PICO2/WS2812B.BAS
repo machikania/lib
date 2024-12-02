@@ -2,7 +2,7 @@ REM WS2812B Serial LED Control Class for MachiKania type PU (RP2350)
 REM WS2812B.BAS
 
 REM Connection:
-REM DIN -- IO bit x
+REM DIN -- GPIO x
 REM VDD -- +5V
 REM GND -- GND
 
@@ -10,7 +10,7 @@ REM Usage:
 REM A=NEW(WS2812B,N,P)
 REM  Init Buffer
 REM  N:Number of LED
-REM  P:IO bit number(0-7)
+REM  P:GPIO number(0-29)
 
 REM METHOD SETLED(Position,R,G,B)
 REM  Set Serial LED Color
@@ -30,13 +30,12 @@ METHOD INIT
  VAR I
  NUMLED=ARGS(1)
  LEDBIT=ARGS(2)
- IF LEDBIT>=8 OR LEDBIT<0 THEN
-  PRINT "IO bit number must be 0-7"
+ IF LEDBIT>=30 OR LEDBIT<0 THEN
+  PRINT "GPIO number must be 0-29"
   END
  ENDIF
  DIM BUFLED(NUMLED*3/4):REM LEDs buffer
  FOR I=0 TO NUMLED*3/4:BUFLED(I)=0:NEXT
- OUT LEDBIT,0
  LEDBIT=1<<LEDBIT
  DELAYUS 280
  GOSUB PUTLED
@@ -67,6 +66,7 @@ RETURN
 METHOD PUTLED
  REM Output LEDBUF data to WS2812Bs
  VAR I,J,D,P
+ POKE32 $D0000038,LEDBIT:REM Set port for output
  P=BUFLED
  I=0:J=NUMLED*3*8
  WHILE I<J
