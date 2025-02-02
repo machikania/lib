@@ -1,6 +1,6 @@
 ＜クラス名およびバージョン＞
 REGEXP
-ver 0.2
+ver 0.3
 
 ＜ファイル名＞
 REGEXP.BAS
@@ -81,3 +81,7 @@ return chr$(peek(d(0))-0x20)
 実行結果：
 
 THIS IS A SIMPLE SAMPLE.
+
+＜バージョン履歴＞
+・Ver 0.3 連続使用時にメモリー割り当て不良を起こす問題を、解消。
+・Ver 0.2 最初の公開バージョン。

@@ -1,5 +1,5 @@
 REM ************************
-REM * Class REGEXP ver 0.2 *
+REM * Class REGEXP ver 0.3 *
 REM *  written by Katsumi  *
 REM ************************
 
@@ -29,6 +29,7 @@ return
 method REGEXEC
   var r
   if args(0)=1 then
+    delete STR
     STR$=args$(1)+""
     r=gosub(C_REGEXEC,RE,STR)
   else
@@ -46,6 +47,7 @@ method MATCH
 method REPLACE
   var t,i,r,b
   dim b(255)
+  delete STR
   STR$=args$(1)
   r$=""
   t=STR
@@ -61,6 +63,7 @@ method REPLACE
 
 method REPLACE_CALLBACK
   var t,i,r
+  delete STR
   STR$=args$(1)
   r$=""
   t=STR
