@@ -1,14 +1,16 @@
 REM CLASS TSC2046
-REM Ver 0.1
+REM Ver 0.2
 REM Connect T_IRQ to GP0 (pin #1), or to the port set in constructor argument #2
 REM Connect T_CS to GP3 (pin #5), or to the port set in constructor argument #1
 REM Connect T_OUT to GP16 (SPI MISO, pin #21)
 REM Connect T_DIN to GP19 (SPI MOSI, pin #25)
 REM Connect T_CLK to GP18 (SPI CLK, pin #24)
+REM
+REM For Waveshare ResTouch, call TSC2046::INIT(9,10)
 
 useclass CRDINI
 
-static private lcdturn,tirq,xmin,xmax,ymin,ymax
+static private lcdturn,tirq,xmin,xmax,ymin,ymax,xflip,yflip
 static public lastx,lasty
 
 METHOD INIT
@@ -81,8 +83,10 @@ METHOD LANDSCAPE
 return
 
 METHOD POLLING
-  var a,b,x,y
+  var a,b,x,y,w,h
   if in(tirq) then return 0
+  w=system(22)-1
+  h=system(23)-1
   x=gosub(tscread,0x94)
   y=gosub(tscread,0xd4)
   a=gosub(tscread,0x94)
@@ -92,20 +96,25 @@ METHOD POLLING
   if abs(y-b)>2 then return 0
   x=(x+a)>>1
   y=(y+b)>>1
-  x=319*(x-xmin)/(xmax-xmin)
-  y=239*(y-ymin)/(ymax-ymin)
+  x=w*(x-xmin)/(xmax-xmin)
+  y=h*(y-ymin)/(ymax-ymin)
+  if xflip then
+    x=w-x
+  elseif yflip then
+    y=h-y
+  endif
   if 0=lcdturn then
-    lastx=319-x
-    lasty=239-y
+    lastx=w-x
+    lasty=h-y
   elseif 90=lcdturn then
-    lastx=239-y
+    lastx=h-y
     lasty=x
   elseif 180=lcdturn then
     lastx=x
     lasty=y
   else
     lastx=y
-    lasty=319-x
+    lasty=w-x
   endif
 return 1
 
@@ -126,23 +135,25 @@ label tscread
 return (r-n-x)>>3
 
 METHOD MINMAX
-  var a,b,x,y
+  var a,b,x,y,w,h
+  w=system(22)
+  h=system(23)
   cls
   if lcdturn=0 or lcdturn=180 then
     line 0,0,30,30:line 0,0,10,0:line 0,0,0,10
-    line 289,209,319,239:line 309,239,319,239:line 319,229,319,239
+    line w-31,h-31,w-1,h-1:line w-11,h-1,w-1,h-1:line w-1,h-11,w-1,h-1
     cursor 0,15
     print "Draw lines on the allows several times."
     print "Then, press FIRE button."
   else
-    line 239,0,209,30:line 239,0,229,0:line 239,0,239,10
-    line 0,319,30,289:line 0,319,10,319:line 0,319,0,309
+    line w-1,0,w-31,30:line w-1,0,w-11,0:line w-1,0,w-1,10
+    line 0,h-1,30,h-31:line 0,h-1,10,h-1:line 0,h-1,0,h-11
     cursor 0,15
     print "Draw lines on the allows "
     print "several times."
     print "Then, press FIRE button."
   endif
-  xmin=0xffff:xmax=0:ymin=0xffff:ymax=0
+  xmin=0xffff:xmax=0:ymin=0xffff:ymax=0:xflip=0:yflip=0
   do
     if keys(32) then break
     if in(tirq) then continue
@@ -159,6 +170,13 @@ METHOD MINMAX
     if xmax<x then xmax=x
     if y<ymin then ymin=y
     if ymax<y then ymax=y
+    if x=xmin and y=ymin or x=xmax and y=ymax then
+      xflip=0:yflip=0
+    elseif x=xmin and y=ymax or x=xmax and y=ymin then
+      yflip=1:xflip=0
+    elseif x=xmax and y=ymin or x=xmin and y=ymax then
+      xflip=1:yflip=0
+    endif
     cursor 5,5:print hex$(xmin),hex$(xmax),
     cursor 5,6:print hex$(ymin),hex$(ymax),
   loop
@@ -175,6 +193,8 @@ label save2file
   fprint "XMAX=";xmax
   fprint "YMIN=";ymin
   fprint "YMAX=";ymax
+  fprint "XFLIP=";xflip
+  fprint "YFLIP=";yflip
   fclose
   setdir c$
 return
@@ -198,6 +218,10 @@ label load4var
       ymin=val(t$(5))
     elseif 0=strncmp(t$,"YMAX=",5) then
       ymax=val(t$(5))
+    elseif 0=strncmp(t$,"XFLIP=",6) then
+      xflip=val(t$(6))
+    elseif 0=strncmp(t$,"YFLIP=",6) then
+      yflip=val(t$(6))
     endif
   loop
   fclose
