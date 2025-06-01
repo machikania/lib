@@ -1,4 +1,4 @@
-REM PLAYAVI.BAS ver 0.3.0
+REM PLAYAVI.BAS ver 0.3.1
 REM MachiKania class PLAYAVI for type PU
 
 usevar IMGHEIGHT,IMGWIDTH,IMGSIZE,PAGE
@@ -261,6 +261,21 @@ label tcallback
   exec $4603,$4905,$b2db,$f8d1,$1084,$4a04,$404b,$b29b
   exec $f8c2,$3084,$e004,$bf00,$8000,$400a,$9000,$400a
   WBREADPOS=WBREADPOS+1
+return
+
+method MOVEAVIPOINTER
+  var n
+  file 1
+  fget &n,4
+  if 0x62643030!=n then CERROR
+  fget &n,4
+  fseek fseek()-8+args(1)*(n+8)
+return
+
+method MOVEWAVPOINTER
+  file 2
+  fseek fseek()+args(1)
+  file 1
 return
 
 label CERROR
