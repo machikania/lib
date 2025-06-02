@@ -1,5 +1,5 @@
 REM CLASS TSC2046
-REM Ver 0.2
+REM Ver 0.2.1
 REM Connect T_IRQ to GP0 (pin #1), or to the port set in constructor argument #2
 REM Connect T_CS to GP3 (pin #5), or to the port set in constructor argument #1
 REM Connect T_OUT to GP16 (SPI MISO, pin #21)
@@ -85,8 +85,13 @@ return
 METHOD POLLING
   var a,b,x,y,w,h
   if in(tirq) then return 0
-  w=system(22)-1
-  h=system(23)-1
+  if 90=lcdturn or 270=lcdturn then
+    w=system(23)-1
+    h=system(22)-1
+  else
+    w=system(22)-1
+    h=system(23)-1
+  endif
   x=gosub(tscread,0x94)
   y=gosub(tscread,0xd4)
   a=gosub(tscread,0x94)
