@@ -1,0 +1,69 @@
+<Class name and version>
+TSC2046
+ver 0.2.1
+
+<File name>
+TSC2046.BAS
+
+<License>
+The BAS file is in the public domain.
+
+<Overview>
+A class for reading touch position data from an LCD with a touch panel using the TSC2046. Requires the CRDINI class.
+
+<Constructor>
+Argument 1
+Specify the GP (General Purpose) pin number connected to the CS pin for SPI communication. If omitted, the default is 3. For the Waveshare ResTouch, specify 9.
+Argument 2
+Specify the GP pin number connected to the IRQ pin of the TSC2046. If omitted, the default is 0. For the Waveshare ResTouch, specify 10.
+
+<Public Static Fields>
+TSC2046::lastx
+Stores the x-axis value of the most recent touch reading.
+TSC2046::lasty
+Stores the y-axis value of the most recent touch reading.
+
+<Public Static Methods>
+TSC2046::INIT([x,[y]])
+	Refer to the constructor section. x: Specifies the CS pin (default is 3). y: Specifies the IRQ pin (default is 0). For the Waveshare ResTouch, specify 9 and 10.
+
+TSC2046::MINMAX()
+	Displays a calibration window to compensate for device-specific variations and saves the results to the /LIB/TSC2046 directory. This method is automatically called right after installing the TSC2046 class, so it does not need to be run every time.
+
+TSC2046::POLLING()
+	Reads the touch position and stores the x and y coordinates in TSC2046::lastx and TSC2046::lasty, respectively. Returns 1 if position data has been updated; otherwise, returns 0.
+
+TSC2046::TOUCH()
+	Returns 1 if the screen is being touched with a pen; otherwise, returns 0.
+
+TSC2046::PORTRAIT()
+	Sets the LCD to portrait orientation.
+
+TSC2046::LANDSCAPE()
+	Sets the LCD to landscape orientation.
+
+
+<Usage Example>
+For the Waveshare ResTouch, change line 6 to "TSC2046::INIT(9,10)".
+
+useclass TSC2046
+
+cls
+x=-1
+
+TSC2046::INIT(3,0)
+rem TSC2046::MINMAX()
+
+do
+  if TSC2046::POLLING() then
+    if 0<=x then
+      line x,y,TSC2046::lastx,TSC2046::lasty
+    else
+      pset TSC2046::lastx,TSC2046::lasty
+    endif
+    x=TSC2046::lastx
+    y=TSC2046::lasty
+  endif
+  if 0=TSC2046::TOUCH() then x=-1
+  delayms 1
+loop

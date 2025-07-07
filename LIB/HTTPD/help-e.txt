@@ -1,0 +1,84 @@
+<Class name and version>
+HTTPD
+ver 0.3.2
+
+<File name>
+HTTPD.BAS
+
+<License>
+The BAS file is in the public domain.
+
+<Overview>
+A class for building an HTTP server when connected via Wi-Fi. The MIME type is uniquely determined by the file extension (see mime.txt for reference).
+
+
+<Constructor>
+First Argument
+	Specifies the port number. If omitted, the default is 80.
+
+Second Argument
+	Specifies the directory to be published by the server. If omitted, the current directory is used by default.
+
+
+<methods>
+START()
+	Waits for a connection from a client. Once a connection is established, the method replies to the client and then terminates.
+
+LASTURI$()
+	Returns the URI requested during the previous client connection as a string.
+
+GETPARAM$([x$])
+	Returns the GET method parameters contained in the URI from the previous connection. If x$ is specified, it returns the value associated with that parameter. If x$ is omitted, it returns the entire query string portion of the URI (i.e., everything after the ?).
+
+POSTHANDLER(funcaddress(xxx))
+	Specifies the callback function for handling POST methods. xxx refers to the label name of the callback function. For details on how to implement the callback function, see the section below.
+
+CGIHANDLER(funcaddress(xxx))
+	Specifies the callback function for handling CGI. xxx refers to the label name of the callback function. For implementation details, see the section below. This callback function is invoked when a request is made for a file with the .CGI extension that does not exist.
+
+
+<Public fields>
+STATUS
+	The status code from the previous connection, such as 200, 404, etc.
+
+HTTPD::RHEADER$
+	A string that stores the request headers from the client.
+
+HTTPD::URI$
+	A string that stores the accessed URI.
+
+
+<How to Implement Callback Function>
+Handling of POST methods and CGI can be implemented using callback functions. Register the callback functions used here with the POSTHANDLER or CGIHANDLER methods.
+
+The following arguments can be used within the callback function:
+	args$(1): The file name that contains the full request sent by the client
+	args$(2): The directory where the file from args$(1) is located
+	args$(3): The root directory of the HTTP server
+
+Information can also be retrieved using HTTPD::RHEADER$ and HTTPD::URI$.
+
+The return value should be a string containing both the header and the response body to be sent to the client. If a string cannot be returned—such as when responding with binary data (e.g., an image) or when the response size is large—it is recommended to create a separate response file and return a header that redirects the client to it using status code 303.
+
+When using variables named with capital letters A–Z inside a callback function, be sure to declare them using the var keyword.
+
+
+<How to Restrict Access to Certain Files>
+To restrict access to certain files—such as when using embed—edit the mime.txt file and add entries at the beginning of the file. To block access to all .ini files, add ini 404 or ini 403 to the beginning of mime.txt, causing the server to return either "404 Not Found" or "403 Forbidden" accordingly.
+
+
+<Usage Example>
+useclass HTTPD
+h=new(HTTPD,80,"/httproot")
+print "server started"
+do
+  h.START()
+  system 201,val(h.GETPARAM$("led"))
+loop
+
+<html><head><title>Test</title>
+<meta name="viewport" content="width=1, initial-scale=5"></head>
+<body>
+<h5 style="text-align:center"><a href="?led=1">ON</a></h5>
+<h5 style="text-align:center"><a href="?led=0">OFF</a></h5>
+</body></html>

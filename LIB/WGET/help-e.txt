@@ -1,0 +1,69 @@
+<Class name and version>
+WGET
+ver 0.3.2
+
+<File name>
+WGET.BAS
+
+<License>
+The BAS file is in the public domain.
+
+<Overview>
+A class for retrieving information from a specified URL as a client when connected via Wi-Fi.
+
+
+<Constructor>
+None
+
+
+<Public field>
+None
+
+
+<Public static methods>
+WGET::FORSTRING$(x$[,y$])
+	Connects to the specified URL and returns the downloaded data as a string.
+	Specify the URL in x$. If using the POST method, specify the string to be sent to the server in y$.
+
+WGET::FORFILE(x$,y$[,z$])
+	Connects to the specified URL and saves the downloaded data as a file.
+	Specify the file name to save as x$, and the URL as y$. If using the POST method, specify the string to send to the server as z$.
+	The return value is the size of the saved file (in bytes).
+
+WGET::FORBUFFER(x,y,z1$[,z2$])
+	Connects to the specified URL and stores the downloaded data into the specified array.
+	Specify the array name in x, and the valid byte size of the array in y.
+	Specify the URL in z1$. If using the POST method, specify the string to send to the server in z2$.
+	The return value is the number of bytes retrieved from the specified URL.
+	If this value is greater than y, note that not all of the data has been saved into the array.
+
+WGET::GETHEADER$([x$])
+	Returns header information after calling a FORxxx method.
+	If x$ is not specified, it returns the entire header. If x$ is specified, it returns only the specified field.
+	For example, to retrieve the value of "Content-Length:", specify "content-length" (case-insensitive).
+
+WGET::ADDRHEADER(x$)
+	Adds the information specified by the string x$ to the request header.
+	When adding multi-line information, append CRLF to the end of each line.
+	The transmission information specified here is only valid for a single execution of a FORxxx method, so if using multiple FORxxx methods, this method must be called for each one.
+
+
+<Usage Example>
+useclass WGET
+print WGET::FORSTRING$("http://abehiroshi.la.coocan.jp/")
+wait 120
+print WGET::GETHEADER$()
+print WGET::GETHEADER$("content-length")
+
+useclass WGET
+print WGET::FORFILE("abe.jpg","http://abehiroshi.la.coocan.jp/abe-top-20190328-2.jpg")
+print WGET::GETHEADER$()
+
+useclass WGET
+dim b(6749): REM 6749=27000/4-1
+i=WGET::FORBUFFER(b,27000,"http://abehiroshi.la.coocan.jp/abe-top-20190328-2.jpg")
+print i
+print WGET::GETHEADER$()
+fopen "abe2.jpg","w"
+fput b,i
+fclose
