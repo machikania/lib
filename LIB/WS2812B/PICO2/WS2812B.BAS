@@ -77,6 +77,7 @@ METHOD PUTLED
    I=I+0:REM dummy code
    I=I+0:REM dummy code
    I=I+0:REM dummy code
+   I=I+0:REM dummy code
    I=I+1
    P=P+((I AND 7)=0)
    POKE32 $D0000020,LEDBIT:REM OUT x,0
