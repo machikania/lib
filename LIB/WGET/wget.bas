@@ -1,9 +1,43 @@
-REM WGET.BAS ver 0.3.2
-REM MachiKania class WGET for type P
+REM WGET.BAS ver 0.4
+REM MachiKania class WGET for type P/PU
 
-static private pdata,header,ucheader,rheader
+static private pdata,header,ucheader,rheader,ignore301
+
+method IGNOREREDIRECT
+  if 0<args(0) then
+    ignore301=args(1)
+  else
+    ignore301=1
+  endif
+return
+
+method GETSTATUS
+  var i
+  if 0=ucheader then return 0
+  i=0
+  for i=0 to 15
+    if 0x20=peek(ucheader+i) then break
+  next
+return val(ucheader$(i+1))
 
 method FORSTRING
+  var t,s,u :REM Text, Status and URL
+  u$=args$(1)
+  do
+    if 1<args(0) then
+      t$=gosub$(FORSTRING_SUB,u$,args$(2))
+    else
+      t$=gosub$(FORSTRING_SUB,u$)
+    endif
+    if ignore301 then break
+    s=gosub(GETSTATUS)
+    if s<300 or 399<s then break
+    u$=gosub$(GETHEADER,"location")
+    if 0=len(u$) then break
+  loop
+return t$
+
+method FORSTRING_SUB
   var t,s,i
   if 1<args(0) then pdata$=args$(2)
   if gosub(connect,args(1)) then return ""
@@ -24,6 +58,23 @@ method FORSTRING
 return t$
 
 method FORBUFFER
+  var r,s,u :REM Return value, Status and URL
+  u$=args$(3)
+  do
+    if 3<args(0) then
+      r=gosub(FORBUFFER_SUB,args(1),args(2),u$,args$(4))
+    else
+      r=gosub(FORBUFFER_SUB,args(1),args(2),u$)
+    endif
+    if ignore301 then break
+    s=gosub(GETSTATUS)
+    if s<300 or 399<s then break
+    u$=gosub$(GETHEADER,"location")
+    if 0=len(u$) then break
+  loop
+return r
+
+method FORBUFFER_SUB
   var b,l,s,i,j,k
   if 3<args(0) then pdata$=args$(4)
   if gosub(connect,args(3)) then return 0
@@ -78,6 +129,23 @@ method FORBUFFER
 return args(2)-l
 
 method FORFILE
+  var r,s,u :REM Return value, Status and URL
+  u$=args$(2)
+  do
+    if 2<args(0) then
+      r=gosub(FORFILE_SUB,args$(1),u$,args$(3))
+    else
+      r=gosub(FORFILE_SUB,args$(1),u$)
+    endif
+    if ignore301 then break
+    s=gosub(GETSTATUS)
+    if s<300 or 399<s then break
+    u$=gosub$(GETHEADER,"location")
+    if 0=len(u$) then break
+  loop
+return r
+
+method FORFILE_SUB
   var s,i,j,k
   if 2<args(0) then pdata$=args$(3)
   if gosub(connect,args(2)) then return 0
