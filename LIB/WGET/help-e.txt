@@ -50,6 +50,8 @@ WGET::ADDRHEADER(x$)
 	When adding multi-line information, append CRLF to the end of each line.
 	The transmission information specified here is only valid for a single execution of a FORxxx method, so if using multiple FORxxx methods, this method must be called for each one.
 
+WGET::GETSTATUS()
+	Returns the status code of the most recent HTTP response (such as 200 or 404).
 
 <Usage Example>
 useclass WGET
