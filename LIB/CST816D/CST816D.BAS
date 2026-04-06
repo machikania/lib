@@ -1,4 +1,4 @@
-REM CST816D ver 0.1
+REM CST816D ver 0.2
 REM Class CST816D for MachiKania Type P, especially for RP2350-Touch-LCD-2
 
 useclass CRDINI
@@ -7,7 +7,11 @@ field Touch, Xpos, Ypos
 static private LCDTURN
 
 method INIT
-  I2C 400
+  if 0<args(0) then
+    I2C args(1)
+  else
+    I2C 400
+  endif
   CRDINI::INIT()
   if CRDINI::ISSET("HORIZONTAL") then
     LCDTURN=0
@@ -41,6 +45,7 @@ rem  | | +--- YposH
 rem  | +----- XposL
 rem  +------- FingerNum
 method POLLING
+  rem The resisters x,y are both used to read 5 bits data
   var x,y
   I2CREADDATA 0x15,&x+1,5,0x02
   Touch=(x>>8) and 0xff

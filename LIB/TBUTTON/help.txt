@@ -1,0 +1,91 @@
+＜クラス名およびバージョン＞
+TBUTTON
+ver 0.2
+
+＜ファイル名＞
+TBUTTON.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+タッチパネル付きの液晶で、タッチボタンを使うためのクラス。
+
+＜コンストラクター＞
+第１引数
+	タッチボタンの X 位置
+第２引数
+	タッチボタンの Y 位置
+第３引数
+	タッチボタンの幅
+第４引数
+	タッチボタンの高さ
+第５引数
+	タッチボタンを押したときに呼ばれるコールバック関数を、funcaddress()で指定。
+第６引数
+	タッチボタンを押したときに呼ばれるコールバック関数を、funcaddress()で指定。省略可。
+第７引数
+	コールバック関数が呼ばれる際の、args(1)の値を指定。省略すれば、ゼロ値。
+
+＜パブリックフィールド＞
+なし。
+
+＜パブリックメソッド＞
+なし。
+
+＜パブリックスタティックフィールド＞
+なし。
+
+＜パブリックスタティックメソッド＞
+TBUTTON::TOUCH(x, y)
+	ボタン押下があった際、位置を x, y で指定して呼び出す。
+
+TBUTTON::RELEASE()
+	ボタン押下が終わった際、呼び出す。
+
+＜コールバック関数＞
+	コールバック関数内では、以下の args() 関数の値が使えます。
+		args(1): コンストラクター第７引数で指定した値
+		args(2): タッチ部位の X 軸位置
+		args(3): タッチ部位の Y 軸位置
+		args(4): ボタンの X 軸位置
+		args(5): ボタンの Y 軸位置
+		args(6): ボタンの幅
+		args(7): ボタンの高さ
+		args(8): コールバック関数のアドレス
+
+＜使用例＞
+RP2350-Touch-LCD-2での使用例。CST816D, GEN3O クラスも使用。
+
+useclass CST816D,TBUTTON,GEN3O
+usegraphic
+K=new(GEN3O,88,"UTF-8")
+T=new(CST816D)
+
+for y=0 to 1
+  for x=0 to 4
+    point x*60,40+y*100
+    K.GPRT(chr$(0x30+x+y*5),0,7)
+    new(TBUTTON,x*60,40+y*100,48,88,funcaddress(push_cb),funcaddress(release_cb),x+y*5)
+  next
+next
+
+do
+  wait 1
+  if T.POLLING() then
+    TBUTTON::touch(T.Xpos, T.Ypos)
+  else
+    TBUTTON::release()
+  endif
+loop
+
+label push_cb
+  print args(1);
+  point args(4),args(5)
+  K.GPRT(chr$(0x30+args(1)),0,3)
+return
+
+label release_cb
+  point args(4),args(5)
+  K.GPRT(chr$(0x30+args(1)),0,7)
+return

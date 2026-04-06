@@ -1,0 +1,55 @@
+<Class Name and Version>
+CST816D
+ver 0.2
+
+<File Name>
+CST816D.BAS
+
+<License>
+The BAS file is in the public domain.
+
+<Overview>
+A class for using the CST816D touch controller chip installed on the RP2350-Touch-LCD-2.
+
+<Constructor>
+Argument 1
+	Specifies the I2C communication baud rate in kHz. If omitted, the default is 400.
+
+<Public Fields>
+Touch
+	Set to 1 when the panel is being touched, otherwise 0.
+
+Xpos
+	Holds the X-axis touch position in pixels.
+
+Ypos
+	Holds the Y-axis touch position in pixels.
+
+<Public Methods>
+POLLING()
+	Checks whether a touch is present and updates the fields Touch, Xpos, and Ypos. The return value is the same as the Touch field.
+
+<Public Static Fields>
+None.
+
+<Public Static Methods>
+None.
+
+<Usage Example>
+useclass CST816D
+usegraphic
+T=new(CST816D)
+
+do
+  wait 1
+  if T.POLLING() then
+    if c then
+      line , T.Xpos, T.Ypos,7
+    else
+      pset T.Xpos, T.Ypos,7
+    endif
+    c=1
+  else
+    c=0
+  endif
+loop

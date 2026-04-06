@@ -1,0 +1,55 @@
+＜クラス名およびバージョン＞
+CST816D
+ver 0.2
+
+＜ファイル名＞
+CST816D.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン。
+
+＜概要＞
+RP2350-Touch-LCD-2 に搭載されているタッチパネルの制御チップ、CST816D を使うためのクラス。
+
+＜コンストラクター＞
+第１引数
+	I2C通信のボーレートを、kHz単位で指定。省略した場合は、400。
+
+＜パブリックフィールド＞
+Touch
+	パネルへのタッチががあれば１、なければ０。
+
+Xpos
+	タッチの X 軸位置を、ピクセル単位で保持。
+
+Ypos
+	タッチの Y 軸位置を、ピクセル単位で保持。
+
+＜パブリックメソッド＞
+POLLING()
+	タッチがあるかどうか調べ、フィールド値、Touch, Xpos, Yposを更新する。戻り値は、Touch フィールド値と同じ。
+
+＜パブリックスタティックフィールド＞
+なし。
+
+＜パブリックスタティックメソッド＞
+なし。
+
+＜使用例＞
+useclass CST816D
+usegraphic
+T=new(CST816D)
+
+do
+  wait 1
+  if T.POLLING() then
+    if c then
+      line , T.Xpos, T.Ypos,7
+    else
+      pset T.Xpos, T.Ypos,7
+    endif
+    c=1
+  else
+    c=0
+  endif
+loop

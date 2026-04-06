@@ -1,0 +1,91 @@
+<Class Name and Version>
+TBUTTON
+ver 0.2
+
+<File Name>
+TBUTTON.BAS
+
+<License>
+The BAS file is in the public domain.
+
+<Overview>
+A class for using touch buttons on an LCD equipped with a touch panel.
+
+<Constructor>
+Argument 1
+	X position of the touch button
+Argument 2
+	Y position of the touch button
+Argument 3
+	Width of the touch button
+Argument 4
+	Height of the touch button
+Argument 5
+	Callback function to be invoked when the touch button is pressed, specified using funcaddress().
+Argument 6
+	Callback function to be invoked when the touch button is pressed, specified using funcaddress(). Optional.
+Argument 7
+	Value for args(1) when the callback function is invoked. If omitted, defaults to zero.
+
+<Public Fields>
+None.
+
+<Public Methods>
+None.
+
+<Public Static Fields>
+None.
+
+<Public Static Methods>
+TBUTTON::TOUCH(x, y)
+	Call this when a button press occurs, specifying the touch position with x and y.
+
+TBUTTON::RELEASE()
+	Call this when the button press ends.
+
+<Callback Functions>
+	Within a callback function, the following args() values are available:
+		args(1): Value specified in the constructorÅfs 7th argument
+		args(2): X coordinate of the touch point
+		args(3): Y coordinate of the touch point
+		args(4): X position of the button
+		args(5): Y position of the button
+		args(6): Width of the button
+		args(7): Height of the button
+		args(8): Address of the callback function
+
+<Usage Example>
+Example usage with RP2350-Touch-LCD-2. Also uses the CST816D and GEN3O classes.
+
+useclass CST816D,TBUTTON,GEN3O
+usegraphic
+K=new(GEN3O,88,"UTF-8")
+T=new(CST816D)
+
+for y=0 to 1
+  for x=0 to 4
+    point x*60,40+y*100
+    K.GPRT(chr$(0x30+x+y*5),0,7)
+    new(TBUTTON,x*60,40+y*100,48,88,funcaddress(push_cb),funcaddress(release_cb),x+y*5)
+  next
+next
+
+do
+  wait 1
+  if T.POLLING() then
+    TBUTTON::touch(T.Xpos, T.Ypos)
+  else
+    TBUTTON::release()
+  endif
+loop
+
+label push_cb
+  print args(1);
+  point args(4),args(5)
+  K.GPRT(chr$(0x30+args(1)),0,3)
+return
+
+label release_cb
+  point args(4),args(5)
+  K.GPRT(chr$(0x30+args(1)),0,7)
+return
