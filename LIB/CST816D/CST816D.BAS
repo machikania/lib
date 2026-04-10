@@ -1,30 +1,21 @@
-REM CST816D ver 0.2
+REM CST816D ver 0.3
 REM Class CST816D for MachiKania Type P, especially for RP2350-Touch-LCD-2
-
-useclass CRDINI
 
 field Touch, Xpos, Ypos
 static private LCDTURN
 
 method INIT
+  var t
+  t=system(2)
+  if val(t$(3))<1512 then
+    print "KM-1512 or later version is required"
+    end
+  endif
+  LCDTURN=system(30)
   if 0<args(0) then
     I2C args(1)
   else
     I2C 400
-  endif
-  CRDINI::INIT()
-  if CRDINI::ISSET("HORIZONTAL") then
-    LCDTURN=0
-  elseif CRDINI::ISSET("LCD0TURN") then
-    LCDTURN=0
-  elseif CRDINI::ISSET("VERTICAL") then
-    LCDTURN=270
-  elseif CRDINI::ISSET("LCD270TURN") then
-    LCDTURN=270
-  elseif CRDINI::ISSET("LCD180TURN") then
-    LCDTURN=180
-  elseif CRDINI::ISSET("LCD90TURN") then
-    LCDTURN=90
   endif
 return
 

@@ -1,6 +1,6 @@
 <Class Name and Version>
 CST816D
-ver 0.2
+ver 0.3
 
 <File Name>
 CST816D.BAS
