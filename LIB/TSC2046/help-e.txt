@@ -1,6 +1,6 @@
 <Class name and version>
 TSC2046
-ver 0.2.1
+ver 0.3
 
 <File name>
 TSC2046.BAS
@@ -9,7 +9,7 @@ TSC2046.BAS
 The BAS file is in the public domain.
 
 <Overview>
-A class for reading touch position data from an LCD with a touch panel using the TSC2046. Requires the CRDINI class.
+A class for reading touch‑position data from an LCD with a touch panel using the TSC2046. Note that the update from ver. 0.2.1 to ver. 0.3 includes specification changes. Up to ver. 0.2.1, static methods and fields were used, but starting with ver. 0.3, the design has been changed to use instance fields and methods instead.
 
 <Constructor>
 Argument 1
@@ -17,24 +17,33 @@ Specify the GP (General Purpose) pin number connected to the CS pin for SPI comm
 Argument 2
 Specify the GP pin number connected to the IRQ pin of the TSC2046. If omitted, the default is 0. For the Waveshare ResTouch, specify 10.
 
+<Public Fields>
+Touch
+	Set to 1 when the panel is being touched, otherwise 0.
+
+Xpos
+	Holds the X-axis touch position in pixels.
+
+Ypos
+	Holds the Y-axis touch position in pixels.
+
+<Public Methods>
+POLLING()
+	Checks whether a touch is present and updates the fields Touch, Xpos, and Ypos. The return value is the same as the Touch field.
+
+MINMAX()
+	Displays a calibration window to compensate for device-specific variations and saves the results to the /LIB/TSC2046 directory. This method is automatically called right after installing the TSC2046 class, so it does not need to be run every time.
+
 <Public Static Fields>
+These are provided only for compatibility with ver. 0.2.1 and are deprecated.
+
 TSC2046::lastx
 Stores the x-axis value of the most recent touch reading.
 TSC2046::lasty
 Stores the y-axis value of the most recent touch reading.
 
 <Public Static Methods>
-TSC2046::INIT([x,[y]])
-	Refer to the constructor section. x: Specifies the CS pin (default is 3). y: Specifies the IRQ pin (default is 0). For the Waveshare ResTouch, specify 9 and 10.
-
-TSC2046::MINMAX()
-	Displays a calibration window to compensate for device-specific variations and saves the results to the /LIB/TSC2046 directory. This method is automatically called right after installing the TSC2046 class, so it does not need to be run every time.
-
-TSC2046::POLLING()
-	Reads the touch position and stores the x and y coordinates in TSC2046::lastx and TSC2046::lasty, respectively. Returns 1 if position data has been updated; otherwise, returns 0.
-
-TSC2046::TOUCH()
-	Returns 1 if the screen is being touched with a pen; otherwise, returns 0.
+These are provided only for compatibility with ver. 0.2.1 and are deprecated.
 
 TSC2046::PORTRAIT()
 	Sets the LCD to portrait orientation.
@@ -42,28 +51,27 @@ TSC2046::PORTRAIT()
 TSC2046::LANDSCAPE()
 	Sets the LCD to landscape orientation.
 
-
 <Usage Example>
-For the Waveshare ResTouch, change line 6 to "TSC2046::INIT(9,10)".
+For the Waveshare ResTouch, change line 6 to "t=new(TSC2046,9,10)".
 
 useclass TSC2046
 
 cls
 x=-1
 
-TSC2046::INIT(3,0)
-rem TSC2046::MINMAX()
+t=new(TSC2046,3,0)
+rem t.MINMAX()
 
 do
-  if TSC2046::POLLING() then
+  if t.POLLING() then
     if 0<=x then
-      line x,y,TSC2046::lastx,TSC2046::lasty
+      line x,y,t.Xpos,t.Ypos
     else
-      pset TSC2046::lastx,TSC2046::lasty
+      pset t.Xpos,t.Ypos
     endif
-    x=TSC2046::lastx
-    y=TSC2046::lasty
+    x=t.Xpos
+    y=t.Ypos
   endif
-  if 0=TSC2046::TOUCH() then x=-1
+  if 0=t.Touch then x=-1
   delayms 1
 loop

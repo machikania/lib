@@ -55,7 +55,7 @@ TBUTTON::RELEASE()
 		args(8): コールバック関数のアドレス
 
 ＜使用例＞
-RP2350-Touch-LCD-2での使用例。CST816D, GEN3O クラスも使用。
+RP2350-Touch-LCD-2での使用例。CST816D, GEN3O クラスも使用。TSC2046で使う場合は、1行目と4行目の「CST816D」を「TSC2046」に書き換えること。
 
 useclass CST816D,TBUTTON,GEN3O
 usegraphic

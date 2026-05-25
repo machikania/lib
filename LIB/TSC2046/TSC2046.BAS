@@ -1,36 +1,27 @@
 REM CLASS TSC2046
-REM Ver 0.2.1
+REM Ver 0.3
 REM Connect T_IRQ to GP0 (pin #1), or to the port set in constructor argument #2
 REM Connect T_CS to GP3 (pin #5), or to the port set in constructor argument #1
 REM Connect T_OUT to GP16 (SPI MISO, pin #21)
 REM Connect T_DIN to GP19 (SPI MOSI, pin #25)
 REM Connect T_CLK to GP18 (SPI CLK, pin #24)
 REM
-REM For Waveshare ResTouch, call TSC2046::INIT(9,10)
-
-useclass CRDINI
+REM For Waveshare ResTouch, create an object by "new(TSC2046,9,10)"
 
 static private lcdturn,tirq,xmin,xmax,ymin,ymax,xflip,yflip
 static public lastx,lasty
 
+field public Xpos, Ypos, Touch
+
 METHOD INIT
   REM Determine LCD direction
-  crdini::init()
-  if crdini::isset("HORIZONTAL") then
-    lcdturn=0
-  elseif crdini::isset("VERTICAL") then
-    lcdturn=270
-  elseif crdini::isset("LCD0TURN") then
-    lcdturn=0
-  elseif crdini::isset("LCD90TURN") then
-    lcdturn=90
-  elseif crdini::isset("LCD180TURN") then
-    lcdturn=180
-  elseif crdini::isset("LCD270TURN") then
-    lcdturn=270
-  else
-    lcdturn=0
+  var t
+  t=system(2)
+  if val(t$(3))<1512 then
+    print "KM-1512 or later version is required"
+    end
   endif
+  lcdturn=system(30)
   REM Set SPI
   REM args(1): port number for T_CS (default: 3)
   if args(0)<1 then
@@ -51,8 +42,9 @@ METHOD INIT
   gosub load4var
 return
 
-METHOD TOUCH
-  if in(tirq) then return 0 else return 1
+rem This method is invalid from ver 3.0
+rem METHOD TOUCH
+rem   if in(tirq) then return 0 else return 1
 
 METHOD PORTRAIT
   var a
@@ -84,6 +76,7 @@ return
 
 METHOD POLLING
   var a,b,x,y,w,h
+  Touch=0
   if in(tirq) then return 0
   if 90=lcdturn or 270=lcdturn then
     w=system(23)-1
@@ -92,13 +85,15 @@ METHOD POLLING
     w=system(22)-1
     h=system(23)-1
   endif
-  x=gosub(tscread,0x94)
-  y=gosub(tscread,0xd4)
   a=gosub(tscread,0x94)
   b=gosub(tscread,0xd4)
-  if in(tirq) then return 0
-  if abs(x-a)>2 then return 0
-  if abs(y-b)>2 then return 0
+  do
+    x=a
+    y=b
+    a=gosub(tscread,0x94)
+    b=gosub(tscread,0xd4)
+    if in(tirq) then return 0
+  loop while abs(x-a)>2 or abs(y-b)>2 
   x=(x+a)>>1
   y=(y+b)>>1
   x=w*(x-xmin)/(xmax-xmin)
@@ -121,6 +116,9 @@ METHOD POLLING
     lastx=y
     lasty=w-x
   endif
+  Touch=1
+  Xpos=lastx
+  Ypos=lasty
 return 1
 
 label tscread
