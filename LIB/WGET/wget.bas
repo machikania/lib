@@ -1,7 +1,23 @@
-REM WGET.BAS ver 0.4
+REM WGET.BAS ver 0.5
 REM MachiKania class WGET for type P/PU
 
-static private pdata,header,ucheader,rheader,ignore301
+static private pdata,header,ucheader,rheader,ignore301,ca_certificate,verify_ca
+
+method SETCACERT
+  if 0=args(1) then
+    ca_certificate=0
+  else
+    ca_certificate$=args$(1)
+  endif
+return
+
+method VERIFYCA
+  if 0=args(0) then
+    verify_ca=1
+  else
+    verify_ca=args(1)
+  endif
+return
 
 method IGNOREREDIRECT
   if 0<args(0) then
@@ -307,7 +323,7 @@ label connect
   TCPSEND t$
   REM Connect to server
   if s then
-    if TLSCLIENT(h$,p) then return 1
+    if TLSCLIENT(h$,p,verify_ca,ca_certificate$) then return 1
   else
     if TCPCLIENT(h$,p) then return 1
   endif

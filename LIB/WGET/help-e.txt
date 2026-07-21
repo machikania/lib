@@ -53,6 +53,12 @@ WGET::ADDRHEADER(x$)
 WGET::GETSTATUS()
 	Returns the status code of the most recent HTTP response (such as 200 or 404).
 
+WGET::VERIFYCA([x])
+	Specifies whether to verify the CA certificate when communicating with an HTTPS site (i.e., whether to use a more secure connection). Set x=1 to enable verification, or x=0 to disable it. If x is omitted, verification is enabled. The default setting before this method is called is verification disabled.
+
+WGET::SETCACERT(x$)
+	If an HTTPS site cannot be accessed using the default CA certificates, specify the root CA certificate of the destination server as a PEM-formatted string in x$.
+
 <Usage Example>
 useclass WGET
 print WGET::FORSTRING$("http://abehiroshi.la.coocan.jp/")

@@ -53,6 +53,12 @@ WGET::ADDRHEADER(x$)
 WGET::GETSTATUS()
 	直前のHTTPレスポンスのステータス番号(200や404など)を返す。
 
+WGET::VERIFYCA([x])
+	HTTPSサイトへの通信の際、CA証明書の確認を行うかどうか(よりセキュアーな通信を行うかどうか)を指定する。x=1で確認有り、x=0で確認無し。xを省略した場合は、確認有り。このメソッドを呼び出す前のデフォルトは、確認なし。
+
+WGET::SETCACERT(x$)
+	デフォルトのCA証明書でHTTPSサイトに接続できない場合、接続先サーバーのルートCA証明書をPEM文字列としてx$に指定する。
+
 ＜使用例＞
 useclass WGET
 print WGET::FORSTRING$("http://abehiroshi.la.coocan.jp/")
