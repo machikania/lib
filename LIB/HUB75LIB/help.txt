@@ -1,0 +1,114 @@
+＜クラス名およびバージョン＞
+HUB75LIB
+ver 0.8
+
+＜ファイル名＞
+HUB75LIB.BAS
+
+＜ライセンス＞
+BASファイルは、パブリックドメイン
+
+＜概要＞
+MachiKania type P / type PUでHUB75およびHUB75E接続のLEDディスプレイの制御を行う
+ファイルはRP2040用とRP2350用の2種類
+
+＜コンストラクター＞
+NEW(HUB75LIB,WX,WY,SECTNUM,MODE,INTERVAL,SECTPORT,R1,G1,B1,R2,G2,B2,CLK,LAT,OE)
+　ディスプレイ用のビデオメモリを確保し、接続インターフェイスの初期化を行う
+　実際の出力開始はLEDON()メソッドを呼び出す
+　パラメータはそれぞれ以下の通り
+　　WX,WY: 　 パネルの横方向、縦方向のドット数
+　　SECTNUM:　セクション行数 (通常HUB75では16、HUB75Eでは32)
+　　MODE: 　　カラーモードを指定 1:GRB(8色) 2:GGRRBB（64色） 3:GGGRRRBB（256色）
+　　INTERVAL: 1行当たりの割り込み間隔（マイクロ秒）
+　　SECTPORT: HUB75のA端子のGPIOポート
+　　　　　　　　注意　A端子～D端子（またはE端子）は連続したポートにする（AがLSB）
+　　R1,G1,B1,R2,G2,B2,CLK,LAT,OE: HUB75の各端子を接続するGPIO番号
+
+　　※各ポート番号はI/O bit番号ではなくRP2040/RP2350のGPIO番号で直接指定する
+
+＜パブリックフィールド＞
+なし
+
+＜パブリックメソッド＞
+LEDON()
+　LEDパネルへの出力割り込みを開始する
+
+LEDOFF()
+　LEDパネルへの出力割り込みを停止し、表示を一時停止する
+
+CLR()
+　ビデオメモリ全体を0で消去する
+
+SETP(X,Y,Color)
+　座標X,Yの位置にColor色で点を描画する。色の形式はカラーモードで指定したもの
+
+LIN(X1,Y1,X2,Y2,Color)
+　座標(X1,Y1)から(X2,Y2)にColor色の線を描画する
+
+BOX(X1,Y1,X2,Y2,Color)
+　座標(X1,Y1)と(X2,Y2)を対角線とするColor色の長方形を描画する
+
+BOXF(X1,Y1,X2,Y2,Color)
+　座標(X1,Y1)と(X2,Y2)を対角線とするColor色の塗りつぶされた長方形を描画する
+
+CIR(X,Y,r,Color)
+　中心座標(X,Y)、半径r、Color色の円を描画する
+
+CIRF(X,Y,r,Color)
+　(中心座標X,Y)、半径r、Color色の塗りつぶされた円を描画する
+
+PRT(X,Y,Color,BC,S$)
+　座標(X,Y)にColor色、背景色BCの文字列S$を描画する
+　BCを負数にすると背景色は描画しない
+
+＜注意＞
+　本クラスでは、CORETIMER割り込みを使用するため、ユーザプログラムでは
+　CORETIMER割り込みは使用不可
+　INTERVALの指定値が小さすぎるとシステムがハングアップするが、
+　逆にINTERVALの指定値が大きいと画面のちらつきの原因となる
+
+　INTERVALと1秒間の表示フレーム数Fは以下の関係となる
+　　INTERVAL(マイクロ秒)=1000000/F/N/SECTNUM
+　　ただしカラーモードMODE=1のときN=1、MODE=2のときN=3、MODE=3のときN=7
+
+＜使用例＞
+RP2350-Zero搭載のMachiKania type PU miniで128x64ドットのLEDパネルを
+カラーモード2（64色）で利用する
+システムを315MHzにオーバークロックし、1行当たりの割り込み間隔を
+173マイクロ秒とする（約60フレーム/秒）
+
+USECLASS HUB75LIB
+SYSTEM 51,15
+SYSTEM 50,315000000
+USEVAR LED
+LED=NEW(HUB75LIB,128,64,32,2,173,8,13,15,14,26,29,27,1,0,5)
+FOR I=0 TO 64 STEP 8
+ LED.LIN(I*2,0,127,I,$0C)
+ LED.LIN(127,I,127-I*2,63,$30)
+ LED.LIN(127-I*2,63,0,63-I,$03)
+ LED.LIN(0,63-I,I,0,$3F)
+NEXT
+LED.PRT(24, 15,$1C,-1,"MachiKania")
+LED.PRT(28, 25,$1F,-1,"HUB75 LED")
+LED.PRT(44, 35,$23,-1,"BASIC")
+LED.PRT(38, 45,$3C,-1,"Library")
+SYSTEM 200,0
+LED.LEDON()
+DO:WAIT 1:LOOP
+
+上記プログラムの接続
+LAT GPIO0
+CLK GPIO1
+OE  GPIO5
+A   GPIO8
+B   GPIO9
+C   GPIO10
+D   GPIO11
+E   GPIO12
+R1  GPIO13
+B1  GPIO14
+G1  GPIO15
+R2  GPIO26
+B2  GPIO27
+G2  GPIO29
